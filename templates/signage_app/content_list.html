@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block contents %}
+<div class="content-create">
+	<a href="{%url 'signage_app:content_create'%}" class="btn">新規作成</a>
+</div>
     <h1>コンテンツ一覧</h1>
     <table class="table">
         <thead>

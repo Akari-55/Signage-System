@@ -23,12 +23,12 @@ class ContentUpdateView(UpdateView):
     model=Content
     form_class=ContentForm
     template_name='signage_app/content_form.html'
-    success_url='contents/'
+    success_url='/contents/'
 
 class ContentDeleteView(DeleteView):
     model=Content
     template_name='signage_app/content_confirm_delete.html'
-    success_url=reverse_lazy('signage_app:contents')
+    success_url=reverse_lazy('contents')
 
 
 def upload_file(request):
