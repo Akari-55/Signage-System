@@ -2,9 +2,9 @@
 
 {% block contents %}
     <h1>コンテンツフォーム</h1>
-    <form method="post" class="mt-3">
+    <form method="post" class="mt-3" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
+	{{ form.as_p }}
         <button type="submit" class="btn btn-success">保存</button>
         <a href="{% url 'signage_app:contents' %}" class="btn btn-secondary">キャンセル</a>
     </form>

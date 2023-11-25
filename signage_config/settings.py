@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'signage_app.apps.SignageAppConfig',
     'bootstrap4',
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [

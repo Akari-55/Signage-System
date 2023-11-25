@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>デジタルサイネージ</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .full-screen {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        img, video {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="full-screen">
+            {% if contents.file_type == "image"  %}
+                <img src="{{ contents.file.url }}" alt="{{ contents.title }}">
+            {% elif contents.file_type == "video"  %}
+                <video autoplay loop muted>
+                    <source src="{{ contents.file.url }}" type="video/mp4">
+               
+                </video>
+            {% endif %}
+            <!-- 他のコンテンツタイプの処理を追加 -->
+        
+    </div>
+</body>
+</html>
+

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import os
 
 class SampleDB(models.Model):
     class Meta:
@@ -7,12 +8,15 @@ class SampleDB(models.Model):
         verbose_name_plural = 'sample_table' # Admionサイトで表示するテーブル名
     sample1 = models.IntegerField('sample1', null=True, blank=True) # 数値を格納
     sample2 = models.CharField('sample2', max_length=255, null=True, blank=True) # 文字列を格納
-
+def content_file_name(instance,filename):
+    ext=filename.split('.')[-1]
+    new_filename=f"{instance.title}.{ext}"
+    return os.path.join('uploads/',new_filename)
 #コンテンツテーブル
 class Content(models.Model):
     title=models.CharField(max_length=100)
     description=models.TextField()
-    file_path=models.FileField(upload_to='uploads/')
+    file=models.FileField(upload_to=content_file_name)
     duration=models.IntegerField()
     content_type=models.CharField(max_length=50)
     created_at=models.DateTimeField(auto_now_add=True)

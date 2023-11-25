@@ -5,7 +5,14 @@
 	<a href="{%url 'signage_app:content_create'%}" class="btn">新規作成</a>
 </div>
     <h1>コンテンツ一覧</h1>
-    <table class="table">
+    {% if error_message %}
+    	<div class="alert alert-danger" role="alert">
+		{{ error_message }}
+	</div>
+	{% endif %}
+	<form method="post" action="{% url 'signage_app:content_list' %}">
+		{% csrf_token %}
+    <table class="table" id="content-table">
         <thead>
             <tr>
                 <th>タイトル</th>
@@ -18,6 +25,7 @@
             <tr>
                 <td>{{ content.title }}</td>
                 <td>{{ content.description }}</td>
+		<td><input type="radio" name="contents selected_content" value="{{ content.pk }}"></td>
                 <td>
                     <a href="{% url 'signage_app:content_edit' content.pk %}" class="btn btn-primary">編集</a>
                     <a href="{% url 'signage_app:content_delete' content.pk %}" class="btn btn-danger">削除</a>
@@ -26,5 +34,7 @@
             {% endfor %}
         </tbody>
     </table>
+    <button type="submit" class="btn btn-primary">選択したコンテンツを表示</button>
+	</form>
 {% endblock %}
 
