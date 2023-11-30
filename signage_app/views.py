@@ -14,6 +14,12 @@ class ContentListView(ListView):
     model=Content
     template_name='signage_app/content_list.html'
     context_object_name='contents'
+    def post(self,request,*args,**kwargs):
+        selected_content_id=request.POST.get('selected_content')
+        if selected_content_id:
+            return redirect('signage_app:display_content',pk=selected_content_id)
+        else:
+            return self.get(request,*args,**kwargs,error_message='Please select a content.')
 
 class ContentCreateView(CreateView):
     model=Content

@@ -10,7 +10,7 @@
 		{{ error_message }}
 	</div>
 	{% endif %}
-	<form method="post" action="{% url 'signage_app:content_list' %}">
+	<form method="post" action="{% url 'signage_app:contents' %}">
 		{% csrf_token %}
     <table class="table" id="content-table">
         <thead>
@@ -25,7 +25,7 @@
             <tr>
                 <td>{{ content.title }}</td>
                 <td>{{ content.description }}</td>
-		<td><input type="radio" name="contents selected_content" value="{{ content.pk }}"></td>
+		<td><input type="radio" name="selected_content" value="{{ content.pk }}"></td>
                 <td>
                     <a href="{% url 'signage_app:content_edit' content.pk %}" class="btn btn-primary">編集</a>
                     <a href="{% url 'signage_app:content_delete' content.pk %}" class="btn btn-danger">削除</a>
