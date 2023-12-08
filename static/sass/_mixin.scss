@@ -1,0 +1,6 @@
+@import 'setting';
+@mixin mq($breakpoint: md) {
+	@media #{map-get($breakpoints, $breakpoint)} {
+		@content; // 中身を出力
+	}
+}

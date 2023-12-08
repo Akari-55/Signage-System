@@ -1,0 +1,5 @@
+{
+    "dartsass.targetDirectory": "static/css", //どのフォルダに出力するか
+  "dartsass.outputFormat": "cssonly", //cssの出力するフォーマット cssonly、minified、bothの３つから選べる
+  "dartsass.disableSourceMap": true
+}
