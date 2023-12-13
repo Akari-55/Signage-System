@@ -5,6 +5,8 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from .models import SampleDB,Content,ContentGroup
+from .models import SampleDB,Content
+
 from .forms import ContentForm
 from django.urls import reverse_lazy
 from rest_framework import viewsets
@@ -70,7 +72,4 @@ def display_content(request,pk):
         contents.file_type='other'
     return render(request,'signage_app/display_content.html',{'contents':contents})
 
-class ContentGroupViewSet(viewsets.ModelViewSet):
-    queryset=ContentGroup.objects.prefetch_related('member__content').all()
-    serializer_class=ContentGroupSerializer
 # Create your views here.

@@ -12,5 +12,3 @@ class ContentForm(forms.ModelForm):
                 'duration':forms.NumberInput(attrs={'class':'form-control'}),
                 'content_type':forms.TextInput(attrs={'class':'form-control'}),
         }
-
-
