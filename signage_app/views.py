@@ -4,9 +4,9 @@ from django.views.generic.edit import CreateView,UpdateView,DeleteView
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from .models import SampleDB,Content,ContentGroup
 from .models import SampleDB,Content
-
+from .models import SampleDB,Content
+from .models import SampleDB,Content
 from .forms import ContentForm
 from django.urls import reverse_lazy
 from rest_framework import viewsets
@@ -71,5 +71,4 @@ def display_content(request,pk):
     else:
         contents.file_type='other'
     return render(request,'signage_app/display_content.html',{'contents':contents})
-
 # Create your views here.
