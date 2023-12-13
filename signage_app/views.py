@@ -70,7 +70,7 @@ def display_content(request,pk):
         contents.file_type='other'
     return render(request,'signage_app/display_content.html',{'contents':contents})
 
-class ContentGroupViewSet(viewset.ModelViewSet):
+class ContentGroupViewSet(viewsets.ModelViewSet):
     queryset=ContentGroup.objects.prefetch_related('member__content').all()
     serializer_class=ContentGroupSerializer
 # Create your views here.

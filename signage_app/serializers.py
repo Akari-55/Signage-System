@@ -13,7 +13,7 @@ class ContentGroupMemberSerializer(serializers.ModelSerializer):
         model=ContentGroupMember
         fields=['order','content']
 
-class ContentGroupSerializer(serizlizers.ModelSerializer):
+class ContentGroupSerializer(serializers.ModelSerializer):
     members=ContentGroupMemberSerializer(many=True)
 
     class Meta:
