@@ -13,7 +13,6 @@ urlpatterns = [
     path('upload/',views.upload_file,name='upload_file'),
     path('media/',views.display_content,name='display_content'),
     path('contents/<int:pk>/display',views.display_content,name='display_content'),
-    path('contents/<int:signage_id>/add_content/',views.add_content_to_signage,name='add_content_to_signage'),
 
 ]
 if settings.DEBUG:

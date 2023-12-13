@@ -28,6 +28,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     # 管理サイトにアクセスするURL
     path('admin/', admin.site.urls),
+    path('api/',admin.site.urls),
 ]
 
 # メディアファイル公開用のURL設定

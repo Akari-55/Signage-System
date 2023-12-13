@@ -32,9 +32,19 @@
                 </td>
             </tr>
             {% endfor %}
+	    {% for group in content_group %}
+	    	<h2>{{ group.name }}</h2>
+		<p>{{ group.description }}</p>
+		<ul>
+			{% for member in group.members.all %}
+			<li>
+				{{ member.content.title }} (Order: {{member.order }})
+			</li>
+			{% endfor %}
+		</ul>
+	   {% endfor %}
         </tbody>
     </table>
     <button type="submit" class="btn btn-primary">選択したコンテンツを表示</button>
 	</form>
 {% endblock %}
-

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Content,SignageContent
+from .models import Content
 
 class ContentForm(forms.ModelForm):
     class Meta:
@@ -13,7 +13,4 @@ class ContentForm(forms.ModelForm):
                 'content_type':forms.TextInput(attrs={'class':'form-control'}),
         }
 
-class AddContentToSignageForm(forms.ModelForm):
-    class Meta:
-        model=SignageContent
-        fields=['content','order']
+

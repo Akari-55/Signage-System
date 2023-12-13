@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-w9fr8@7p2&2u&at0+#6i&1e!5!$5hxa5u!vzc30woop7rd6q)@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'signage_app.apps.SignageAppConfig',
     'bootstrap4',
     'django_cleanup',
+    'rest_framework',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
