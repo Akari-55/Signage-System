@@ -4,8 +4,8 @@ from django.views.generic.edit import CreateView,UpdateView,DeleteView
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from .models import SampleDB,Content
-from .forms import ContentForm
+from .models import SampleDB,Content,Signage
+from .forms import ContentForm,AddContentToSignageForm
 from django.urls import reverse_lazy
 
 
@@ -67,4 +67,21 @@ def display_content(request,pk):
     else:
         contents.file_type='other'
     return render(request,'signage_app/display_content.html',{'contents':contents})
+
+def add_content_to_signage(request,signage_id):
+    signage=Signage.objects.get(id=signage_id)
+    
+    if request.method=='POST':
+        form = AddContentToSignageForm(request.POST)
+        if form.is_valid():
+            content=form.cleaned_data['content']
+            order=form.cleaned_data['order']
+            
+            #サイネージにコンテンツを追加する
+            signage_content=SignageContent(signage=signage,content=content,order=order)
+            signage_content.save()
+            return redirect('signage_detail',signage_id=signage_id)
+        else:
+            form=AddContentToSignageForm()
+        return render(request,'add_content_to_signage.html',{'form':form,'signage':signage})
 # Create your views here.

@@ -1,0 +1,12 @@
+<!-- add_content_to_signage.html -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Add Content to Signage: {{ signage.name }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Content</button>
+  </form>
+  <a href="{% url 'signage_detail' signage.id %}">Back to Signage</a>
+{% endblock %}

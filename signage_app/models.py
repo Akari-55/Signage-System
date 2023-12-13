@@ -53,5 +53,21 @@ class ContentGroupMember(models.Model):
 #カスタムユーザーテーブル
 class User(AbstractUser):
     role=models.CharField(max_length=50)
+#サイネージ組み合わせ
+class Signage(models.Model):
+    name=models.CharField(max_length=100)
+    description=models.TextField()
+    contents=models.ManyToManyField(Content,through='SignageContent')
 
+    def __self__(self):
+        return self.name
+
+#サイネージとコンテンツ
+class SignageContent(models.Model):
+    signage=models.ForeignKey(Signage,on_delete=models.CASCADE)
+    content=models.ForeignKey(Content,on_delete=models.CASCADE)
+    order=models.IntegerField()
+    
+    def __str__(self):
+        return f"{self.signage.name} - {self.content.title}"
 # Create your models here.
