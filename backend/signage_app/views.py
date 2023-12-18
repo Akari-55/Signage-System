@@ -1,72 +1,107 @@
-from django.shortcuts import render,redirect,get_object_or_404  
-from django.views.generic import ListView
-from django.views.generic.edit import CreateView,UpdateView,DeleteView
-from django.http import JsonResponse
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-from .models import SampleDB,Content
-from .forms import ContentForm
-from django.urls import reverse_lazy
-from rest_framework import viewsets
-from .serializers import ContentGroupSerializer
+from rest_framework import status,viewsets
+from .serializers import ContentSerializer,DeviceSerializer,ScheduleSerializer,ContentGroupMemberSerializer,ContentGroupSerializer
+from .models import Content,Device,Schedule,ContentGroupMember,ContentGroup
+from rest_framework.response import Response
 
+class ContentViewSet(viewsets.ModelViewSet):
+    queryset=Content.objects.all()
+    serializer_class=ContentSerializer
 
+    def destroy(self,request,*args,**kwargs):
+        response={'message':'DELETE mothod is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
 
-class ContentListView(ListView):
-    model=Content
-    template_name='signage_app/content_list.html'
-    context_object_name='contents'
-    def post(self,request,*args,**kwargs):
-        selected_content_id=request.POST.get('selected_content')
-        if selected_content_id:
-            return redirect('signage_app:display_content',pk=selected_content_id)
-        else:
-            return self.get(request,*args,**kwargs,error_message='Please select a content.')
+    def update(self,request,*args,**kwargs):
+        response={'message':'UPDATE method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
 
-class ContentCreateView(CreateView):
-    model=Content
-    form_class=ContentForm
-    template_name='signage_app/content_form.html'
-    success_url=reverse_lazy('signage_app:contents')
+    def partial_update(self,request,*args,**kwargs):
+        response={'message':'PATCH method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+    
+    def get_queryset(self):
+        device_id=self.request.query_params.get('device_id')
+        return Content.objects.filter(device__device_id=device_id)
 
-class ContentUpdateView(UpdateView):
-    model=Content
-    form_class=ContentForm
-    template_name='signage_app/content_form.html'
-    success_url=reverse_lazy('signage_app:contents')
+    def create(self,request,*args,**kwargs):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers=self.get_success_headers(serializer.data)
+        return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)
 
-class ContentDeleteView(DeleteView):
-    model=Content
-    template_name='signage_app/content_confirm_delete.html'
-    success_url=reverse_lazy('signage_app:contents')
+class DeviceViewSet(viewsets.ModelViewSet):
+    queryset=Device.objects.all()
+    serializer_class=DeviceSerializer
 
+    def partial_update(self,request,*args,**kwargs):
+        response={'message':'PATCH method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+    
+class ScheduleViewSet(viewsets.ModelViewSet):
+    queryset=Schedule.objects.all()
+    serializer_class=ScheduleSerializer
 
-def upload_file(request):
-    if request.method =='POST':
-        form=ContentForm(request.POST,request.FILES)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'message':'ファイルがアップロードされました'})
-        else:
-            return JsonResponse({'error':form.errors},status=400)
-    return render(request,'signage_app/upload.html',{'form':ContentForm()})
+    def get_queryset(self):
+        content_id=self.request.query_params.get('content_id')
+        if content_id:
+            return Schedule.objects.filter(content_id=content_id)
+        return super().get_queryset()
 
+    def destoroy(self,request,*args,**kwargs):
+        response={'message':'DELETE method is not allowed' }
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+    
+    def partial_update(self,request,*args,**kwargs):
+        response={'message':'PATCH method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
 
-def content_list(request):
-    contents=Content.objects.all()
-    selected_content_id=request.POST.get('selected_content')
-    if selected_content_id:
-        return redirect('display_content',pk=selected_content_id)
-    else:
-        return render(request,'signage_app/content_list.html',{'contents':contents,'error_message':'Please select a content.'})
-def display_content(request,pk):
-    contents=get_object_or_404(Content,pk=pk)
-    file_name=contents.file.name.lower()
-    if file_name.endswith(('.png','.jpg','.jpeg')):
-        contents.file_type='image'
-    elif file_name.endswith('.mp4'):
-        contents.file_type='video'
-    else:
-        contents.file_type='other'
-    return render(request,'signage_app/display_content.html',{'contents':contents})
-# Create your views here.
+    def create(self,request,*args,**kwargs):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers=self.get_success_headers(serializer.data)
+        return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)
+
+class ContentGroupViewSet(viewsets.ModelViewSet):
+    queryset=ContentGroup.objects.all()
+    serializer_class=ContentGroupSerializer
+
+    def get_queryset(self):
+        device_id=self.request.query_params.get('device_id')
+        return Content.objects.filter(device__device_id=device_id)
+
+    def destoroy(self,request,*args,**kwargs):
+        response={'message':'DELETE method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self,request,*args,**kwargs):
+        reaponse={'message':'UPDATE method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self,request,*args,**kwargs):
+        response={'message':'PATCH method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+
+class ContentGroupMemberViewSet(viewsets.ModelViewSet):
+    queryset=ContentGroupMember.objects.all()
+    serializer_class=ContentGroupMemberSerializer
+
+    def destoroy(self,request,*args,**kwargs):
+        response={'message':'DELETE method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self,request,*args,**kwargs):
+        reaponse={'message':'UPDATE method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+    
+    def partial_update(self,request,*args,**kwargs):
+        response={'message':'PATCH method is not allowed'}
+        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+    
+    def create(self,request,*args,**kwargs):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers=self.get_success_headers(serializer.data)
+        return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)

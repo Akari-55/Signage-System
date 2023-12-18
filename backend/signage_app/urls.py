@@ -1,18 +1,19 @@
-from django.urls import path
+from django.urls import include,path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import ContentListView,ContentCreateView,ContentUpdateView,ContentDeleteView
-from . import views
+from rest_framework import routers
+from .views import ContentViewSet,DeviceViewSet,ScheduleViewSet,ContentGroupViewSet,ContentGroupMemberViewSet
+
 
 app_name = 'signage_app'
+router=routers.DefaultRouter()
+router.register('content',ContentViewSet)
+router.register('device',DeviceViewSet)
+router.register('schedule',ScheduleViewSet)
+router.register('contentgroup',ContentGroupViewSet)
+router.register('contentgroupmember',ContentGroupMemberViewSet)
 urlpatterns = [
-    path('contents/',ContentListView.as_view(),name='contents'),
-    path('contents/create/',ContentCreateView.as_view(),name='content_create'),
-    path('contents/<int:pk>/edit/',ContentUpdateView.as_view(),name='content_edit'),
-    path('contents/<int:pk>/delete/',ContentDeleteView.as_view(),name='content_delete'),
-    path('upload/',views.upload_file,name='upload_file'),
-    path('media/',views.display_content,name='display_content'),
-    path('contents/<int:pk>/display',views.display_content,name='display_content'),
+    path('',include(router.urls))
 
 ]
 if settings.DEBUG:

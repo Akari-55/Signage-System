@@ -11,7 +11,7 @@ class ContentSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model=Content
-        fields=['id','title','description','file','duration','content_type','created_at','updated_at']
+        fields=['id','title','description','file','duration','content_type','created_at','updated_at','device']
 
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,7 +46,7 @@ class ContentGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=ContentGroup
-        fields=['id','name','description','contents']
+        fields=['id','name','description','contents','device']
 
     def get_contents(self,obj):
         group_members=ContentGroupMember.objects.filter(group==obj)

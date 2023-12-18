@@ -14,19 +14,6 @@ def content_file_name(instance,filename):
     ext=filename.split('.')[-1]
     new_filename=f"{instance.title}.{ext}"
     return os.path.join('uploads/',new_filename)
-
-    #コンテンツテーブル
-class Content(models.Model):
-    title=models.CharField(max_length=100)
-    description=models.TextField()
-    file=models.FileField(upload_to=content_file_name)
-    duration=models.IntegerField()
-    content_type=models.CharField(max_length=50)
-    created_at=models.DateTimeField(auto_now_add=True)
-    updated_at=models.DateTimeField(auto_now=True)
-    def __str__(self):
-        return self.title
-
 #デバイステーブル
 class Device(models.Model):
     serial_number=models.CharField(max_length=100,unique=True)
@@ -37,6 +24,19 @@ class Device(models.Model):
     last_active=models.DateTimeField()
     def __str__(self):
         return self.serial_number
+
+    #コンテンツテーブル
+class Content(models.Model):
+    title=models.CharField(max_length=100)
+    device=models.ForeignKey(Device,on_delete=models.CASCADE)
+    description=models.TextField()
+    file=models.FileField(upload_to=content_file_name)
+    duration=models.IntegerField()
+    content_type=models.CharField(max_length=50)
+    created_at=models.DateTimeField(auto_now_add=True)
+    updated_at=models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.title
 
 #スケジュールテーブル
 class Schedule(models.Model):
@@ -54,6 +54,7 @@ class Schedule(models.Model):
 class ContentGroup(models.Model):
     name=models.CharField(max_length=100)
     description=models.TextField()
+    device=models.ForeignKey(Device,on_delete=models.CASCADE)
     def __str__(self):
         return self.name
 

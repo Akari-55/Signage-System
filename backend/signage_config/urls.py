@@ -28,7 +28,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     # 管理サイトにアクセスするURL
     path('admin/', admin.site.urls),
-    path('authen',include('djoser.urls.jwt')),
+    path('authen/',include('djoser.urls.jwt')),
 ]
 
 # メディアファイル公開用のURL設定
