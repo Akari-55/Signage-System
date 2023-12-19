@@ -31,7 +31,7 @@ class Content(models.Model):
     device=models.ForeignKey(Device,on_delete=models.CASCADE)
     description=models.TextField()
     file=models.FileField(upload_to=content_file_name)
-    duration=models.IntegerField()
+    status=models.CharField(max_length=50,default='未公開')
     content_type=models.CharField(max_length=50)
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
@@ -55,6 +55,7 @@ class ContentGroup(models.Model):
     name=models.CharField(max_length=100)
     description=models.TextField()
     device=models.ForeignKey(Device,on_delete=models.CASCADE)
+    status=models.CharField(max_length=50,default='未公開')
     def __str__(self):
         return self.name
 
