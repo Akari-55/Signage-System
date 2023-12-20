@@ -37,19 +37,6 @@ class Content(models.Model):
     updated_at=models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.title
-
-#スケジュールテーブル
-class Schedule(models.Model):
-    content_type=models.ForeignKey(ContentType,on_delete=models.CASCADE)
-    object_id=models.PositiveIntegerField()
-    content_object=GenericForeignKey('content_type','object_id')
-    start_time=models.DateTimeField()
-    end_time=models.DateTimeField()
-    priority= models.IntegerField()
-
-    def __str__(self):
-        return f"{self.content_object}-{self.start_time} to {self.end_time}"
-
 #コンテンツグループテーブル
 class ContentGroup(models.Model):
     name=models.CharField(max_length=100)
@@ -58,6 +45,18 @@ class ContentGroup(models.Model):
     status=models.CharField(max_length=50,default='未公開')
     def __str__(self):
         return self.name
+
+#スケジュールテーブル
+class Schedule(models.Model):
+    object_id=models.PositiveIntegerField()
+    content=models.ForeignKey(Content,on_delete=models.CASCADE,related_name='schedules')
+    contentgroup=models.ForeignKey(ContentGroup,on_delete=models.CASCADE,related_name='schedules')
+    start_time=models.DateTimeField()
+    end_time=models.DateTimeField()
+    priority= models.IntegerField()
+
+    def __str__(self):
+        return f"{self.content_object}-{self.start_time} to {self.end_time}"
 
 #コンテンツグループメンバーテーブル
 class ContentGroupMember(models.Model):

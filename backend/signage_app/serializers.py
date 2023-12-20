@@ -16,14 +16,14 @@ class ContentSerializer(serializers.ModelSerializer):
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model=Device
-        fields=['id','serial_number','monitor_id','name','location','status','last_active','fixed_ip']
+        fields=['id','serial_number','monitor_id','name','location','status','last_active']
 
 class ScheduleSerializer(serializers.ModelSerializer):
     content_object=serializers.SerializerMethodField()
 
     class Meta:
         model=Schedule
-        fields=['id','content_type','object_id','content_object','start_time','end_time','priority']
+        fields=['id','content','object_id','contentgroup','start_time','end_time','priority']
 
     def get_content_object(self,obj):
         if obj.content_type.model == 'content':
@@ -46,8 +46,8 @@ class ContentGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=ContentGroup
-        fields=['id','name','description','contents','device']
+        fields=['id','name','description','status','device']
 
     def get_contents(self,obj):
-        group_members=ContentGroupMember.objects.filter(group==obj)
+        group_members=ContentGroupMember.objects.filter(group=obj)
         return ContentGroupMemberSerializer(group_members,many=True.data)

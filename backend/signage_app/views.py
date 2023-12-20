@@ -20,8 +20,8 @@ class ContentViewSet(viewsets.ModelViewSet):
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
     
     def get_queryset(self):
-        device_id=self.request.query_params.get('device_id')
-        return Content.objects.filter(device__device_id=device_id)
+        device_id=self.request.query_params.get('device')
+        return Content.objects.filter(device__monitor_id=device_id)
 
     def create(self,request,*args,**kwargs):
         serializer=self.get_serializer(data=request.data)
@@ -44,8 +44,11 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         content_id=self.request.query_params.get('content_id')
+        contentgroup_id=self.request.query_params.get('contentgroup_id')
         if content_id:
             return Schedule.objects.filter(content_id=content_id)
+        elif contentgroup_id:
+            return Schedule.objects.filter(contentgroup_id=contentgroup_id)
         return super().get_queryset()
 
     def destoroy(self,request,*args,**kwargs):
@@ -68,15 +71,15 @@ class ContentGroupViewSet(viewsets.ModelViewSet):
     serializer_class=ContentGroupSerializer
 
     def get_queryset(self):
-        device_id=self.request.query_params.get('device_id')
-        return Content.objects.filter(device__device_id=device_id)
+        device_id=self.request.query_params.get('device')
+        return Content.objects.filter(device__monitor_id=device_id)
 
     def destoroy(self,request,*args,**kwargs):
         response={'message':'DELETE method is not allowed'}
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
 
     def update(self,request,*args,**kwargs):
-        reaponse={'message':'UPDATE method is not allowed'}
+        response={'message':'UPDATE method is not allowed'}
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self,request,*args,**kwargs):
@@ -92,7 +95,7 @@ class ContentGroupMemberViewSet(viewsets.ModelViewSet):
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
 
     def update(self,request,*args,**kwargs):
-        reaponse={'message':'UPDATE method is not allowed'}
+        response={'message':'UPDATE method is not allowed'}
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
     
     def partial_update(self,request,*args,**kwargs):
