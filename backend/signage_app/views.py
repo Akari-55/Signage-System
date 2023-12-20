@@ -20,7 +20,7 @@ class ContentViewSet(viewsets.ModelViewSet):
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
     
     def get_queryset(self):
-        device_id=self.request.query_params.get('device')
+        device_id=self.request.query_params.get('monitor_id')
         return Content.objects.filter(device__monitor_id=device_id)
 
     def create(self,request,*args,**kwargs):
@@ -71,7 +71,7 @@ class ContentGroupViewSet(viewsets.ModelViewSet):
     serializer_class=ContentGroupSerializer
 
     def get_queryset(self):
-        device_id=self.request.query_params.get('device')
+        device_id=self.request.query_params.get('monitor.py')
         return Content.objects.filter(device__monitor_id=device_id)
 
     def destoroy(self,request,*args,**kwargs):
