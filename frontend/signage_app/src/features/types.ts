@@ -11,6 +11,7 @@ export interface DeviceState{
     currentContent:string | null;
 }
 export interface Content{
+    id:number;
     title:string;
     device:Device;
     description:string;
@@ -29,12 +30,14 @@ export interface Schedule{
     priority:number;
 }
 export interface ContentGroup{
+    id:number;
     name:string;
     description:string;
     device:Device;
     status:string;
 }
 export interface ContentGroupMember{
+    id:number;
     group:ContentGroup;
     content:Content;
     order:number;

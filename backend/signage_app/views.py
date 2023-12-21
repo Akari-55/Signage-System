@@ -71,7 +71,7 @@ class ContentGroupViewSet(viewsets.ModelViewSet):
     serializer_class=ContentGroupSerializer
 
     def get_queryset(self):
-        device_id=self.request.query_params.get('monitor.py')
+        device_id=self.request.query_params.get('monitor_id')
         return Content.objects.filter(device__monitor_id=device_id)
 
     def destoroy(self,request,*args,**kwargs):

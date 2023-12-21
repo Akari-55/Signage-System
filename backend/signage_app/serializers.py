@@ -16,7 +16,7 @@ class ContentSerializer(serializers.ModelSerializer):
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model=Device
-        fields=['id','serial_number','monitor_id','name','location','status','last_active']
+        fields=['id','ip_address','monitor_id','name','location','status','last_active']
 
 class ScheduleSerializer(serializers.ModelSerializer):
     content_object=serializers.SerializerMethodField()

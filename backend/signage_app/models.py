@@ -16,6 +16,7 @@ def content_file_name(instance,filename):
     return os.path.join('uploads/',new_filename)
 #デバイステーブル
 class Device(models.Model):
+    ip_address = models.GenericIPAddressField(protocol='both',unpack_ipv4=False,unique=True)
     serial_number=models.CharField(max_length=100,unique=True)
     monitor_id=models.IntegerField()
     name=models.CharField(max_length=100)

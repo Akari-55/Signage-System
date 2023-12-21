@@ -5,7 +5,17 @@ const initialState:DeviceState={
     isOn:false,
     currentContent:null,
 };
-
+const API_URL='http://localhost:8000/signage_app/device'
+export const fetchCurrentContent = createAsyncThunk(
+    'Device/fetchCurrentContent',
+    async()=>{
+        const response =await fetch(API_URL);
+        if(!response.ok){
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }
+)
 export const deviceSlice = createSlice({
     name:'device',
     initialState,
