@@ -1,14 +1,11 @@
 export interface Device{
+    id:number;
     serial_number:string;
-    monitor_id:number;
+    monitor_id:string | null;
     name:string;
     location:string;
     status:string;
     last_active:string;
-}
-export interface DeviceState{
-    isOn:boolean;
-    currentContent:string | null;
 }
 export interface Content{
     id:number;

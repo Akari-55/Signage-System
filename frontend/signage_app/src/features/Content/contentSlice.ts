@@ -1,7 +1,8 @@
 import {createSlice,createAsyncThunk,PayloadAction} from '@reduxjs/toolkit';
-import {Content,ContentGroup,ContentGroupMember} from '../types';
+import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
 import {RootState} from "../../app/store";
 import axios from "axios";
+import {SelectDevice,SelectCurrentMonitorId} from '../Device/deviceSlice';
 
 interface ContentState{
     contents:Content[];
@@ -20,8 +21,8 @@ const initialState: ContentState={
 
 export const fetchContent=createAsyncThunk(
     'Content/fetchContent',
-    async()=>{
-        const response=await axios.get('http://loacalhost:8000/signage_app/content',{
+    async(monitor_id:number)=>{
+        const response=await axios.get('http://loacalhost:8000/signage_app/content?monitor_id=${monitor_id}',{
             headers:{
                 "Content-Type":"application/json",
             },
@@ -31,8 +32,8 @@ export const fetchContent=createAsyncThunk(
 )
 export const fetchContentGroup=createAsyncThunk(
     'Content/fetchContentGroup',
-    async()=>{
-        const response =await axios.get('http://loacalhost:8000/signage_app/contentgroup',{
+    async(monitor_id:number)=>{
+        const response =await axios.get('http://loacalhost:8000/signage_app/contentgroup?monitor_id=${monitor_id}',{
             headers:{
                 "Content-Type":"application/json",
             },
@@ -51,7 +52,6 @@ export const fetchContentGroupMember=createAsyncThunk(
         return response.data;
     }
 )
-
 const contentSlice=createSlice({
     name:'content',
     initialState,
@@ -150,7 +150,7 @@ const contentSlice=createSlice({
                 state.loading=false;
             })
         
-    }
+    },
 })
 export const{
     addContent,
@@ -164,11 +164,11 @@ export const{
     deleteContentGroupMember,
 }=contentSlice.actions
 
-export const selectContent=(state:RootState)=>state.content.contents;
-export const selectContentGroup=(state:RootState)=>state.content.contentGroups;
-export const selectContentGroupMember=(state:RootState)=>state.content.contentGroupMembers;
-export const selectLoading=(state:RootState)=>state.content.loading;
-export const selectError=(state:RootState)=>state.content.error;
+export const SelectContent=(state:RootState)=>state.content.contents;
+export const SelectContentGroup=(state:RootState)=>state.content.contentGroups;
+export const SelectContentGroupMember=(state:RootState)=>state.content.contentGroupMembers;
+export const SelectLoading=(state:RootState)=>state.content.loading;
+export const SelectError=(state:RootState)=>state.content.error;
 
 export default contentSlice.reducer;
 

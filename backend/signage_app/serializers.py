@@ -9,6 +9,7 @@ class ContentSerializer(serializers.ModelSerializer):
     updated_at=serializers.DateTimeField(
             format="%Y/%m/%d",read_only=True
     )
+    
     class Meta:
         model=Content
         fields=['id','title','description','file','content_type','created_at','updated_at','device']

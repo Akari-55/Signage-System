@@ -1,9 +1,11 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import contentReducer from '../features/Content/contentSlice';
+import deviceReducer from '../features/Device/deviceSlice';
 
 export const store = configureStore({
   reducer: {
     content:contentReducer,
+    device:deviceReducer,
   },
 });
 

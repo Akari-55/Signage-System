@@ -17,14 +17,14 @@ def content_file_name(instance,filename):
 #デバイステーブル
 class Device(models.Model):
     ip_address = models.GenericIPAddressField(protocol='both',unpack_ipv4=False,unique=True)
-    serial_number=models.CharField(max_length=100,unique=True)
+    # serial_number=models.CharField(max_length=100,unique=True)
     monitor_id=models.IntegerField()
     name=models.CharField(max_length=100)
     location=models.CharField(max_length=100)
     status=models.CharField(max_length=50)
     last_active=models.DateTimeField()
     def __str__(self):
-        return self.serial_number
+        return self.monitor_id
 
     #コンテンツテーブル
 class Content(models.Model):
