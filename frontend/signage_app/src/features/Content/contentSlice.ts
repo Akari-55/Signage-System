@@ -2,8 +2,6 @@ import {createSlice,createAsyncThunk,PayloadAction} from '@reduxjs/toolkit';
 import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
 import {RootState} from "../../app/store";
 import axios from "axios";
-import {SelectDevice,SelectCurrentMonitorId} from '../Device/deviceSlice';
-
 interface ContentState{
     contents:Content[];
     contentGroups:ContentGroup[];
