@@ -24,7 +24,7 @@ class Device(models.Model):
     status=models.CharField(max_length=50)
     last_active=models.DateTimeField()
     def __str__(self):
-        return self.monitor_id
+        return self.name
 
     #コンテンツテーブル
 class Content(models.Model):

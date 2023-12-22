@@ -7,7 +7,7 @@ from .views import ContentViewSet,DeviceViewSet,ScheduleViewSet,ContentGroupView
 
 app_name = 'signage_app'
 router=routers.DefaultRouter()
-router.register('content',ContentViewSet)
+router.register(r'content',ContentViewSet)
 router.register('device',DeviceViewSet)
 router.register('schedule',ScheduleViewSet)
 router.register('contentgroup',ContentGroupViewSet)

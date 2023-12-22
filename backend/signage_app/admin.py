@@ -8,7 +8,7 @@ class ContentAdmin(admin.ModelAdmin):
 
 #デバイスモデルの管理
 class DeviceAdmin(admin.ModelAdmin):
-    list_display=('name','serial_number','monitor_id','location','status','last_active')
+    list_display=('name','ip_address','monitor_id','location','status','last_active')
     serch_fields=('name','location')
 
 #コンテンツグループモデルの管理
