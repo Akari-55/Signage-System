@@ -17,12 +17,18 @@ const initialState:DeviceState={
 export const fetchDevice=createAsyncThunk(
     'Device/fetchDevice',
     async()=>{
+        try{
         const response =await axios.get('http://localhost:8000/signage_app/device',{
             headers:{
                 "Content-Type":"application/json",
             }
         });
         return response.data;
+    }catch(error){
+        console.error("デバイスの取得中にエラーが発生しました",error);
+        throw error;
+    }
+        
     }
 )
 export const deviceSlice = createSlice({

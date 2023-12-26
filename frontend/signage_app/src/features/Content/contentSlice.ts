@@ -20,9 +20,10 @@ const initialState: ContentState={
 export const fetchContent=createAsyncThunk(
     'Content/fetchContent',
     async(monitor_id:number)=>{
-        const response=await axios.get('http://loacalhost:8000/signage_app/content?monitor_id=${monitor_id}',{
+        const response=await axios.get(`http://localhost:8000/signage_app/content?monitor_id=${monitor_id}`,{
             headers:{
                 "Content-Type":"application/json",
+                //"Cache-Control":"no-store",
             },
         });
         return response.data;
@@ -31,7 +32,7 @@ export const fetchContent=createAsyncThunk(
 export const fetchContentGroup=createAsyncThunk(
     'Content/fetchContentGroup',
     async(monitor_id:number)=>{
-        const response =await axios.get('http://loacalhost:8000/signage_app/contentgroup?monitor_id=${monitor_id}',{
+        const response =await axios.get(`http://localhost:8000/signage_app/contentgroup?monitor_id=${monitor_id}`,{
             headers:{
                 "Content-Type":"application/json",
             },
@@ -42,7 +43,7 @@ export const fetchContentGroup=createAsyncThunk(
 export const fetchContentGroupMember=createAsyncThunk(
     'Content/fetchContentGroupMember',
     async()=>{
-        const response =await axios.get('http://localhost:8000/signage_app/contentgroupmember',{
+        const response =await axios.get(`http://localhost:8000/signage_app/contentgroupmember`,{
             headers:{
                 "Content-Type":"application/json",
             },
@@ -61,8 +62,8 @@ const contentSlice=createSlice({
         },
         //コンテンツの更新
         updateContent:(state,action:PayloadAction<Content>)=>{
-            const index=state.contents.findIndex(content =>content.id ==action.payload.id);
-            if(index != -1){
+            const index=state.contents.findIndex(content =>content.id === action.payload.id);
+            if(index !== -1){
                 state.contents[index]=action.payload;
             }
         },
@@ -76,7 +77,7 @@ const contentSlice=createSlice({
         },
         //コンテンツグループの更新
         updateContentGroup:(state,action:PayloadAction<ContentGroup>)=>{
-            const index=state.contentGroups.findIndex(group=>group.id == action.payload.id);
+            const index=state.contentGroups.findIndex(group=>group.id === action.payload.id);
             if(index !== -1){
                 state.contentGroups[index]=action.payload;
             }
@@ -93,7 +94,7 @@ const contentSlice=createSlice({
         },
         //コンテンツグループメンバーの更新
         updateContentGroupMember:(state,action:PayloadAction<ContentGroupMember>)=>{
-            const index = state.contentGroupMembers.findIndex(member=>member.id==action.payload.id);
+            const index = state.contentGroupMembers.findIndex(member=>member.id===action.payload.id);
             if(index !== -1){
                 state.contentGroupMembers[index]=action.payload;
             }
@@ -169,6 +170,35 @@ export const SelectLoading=(state:RootState)=>state.content.loading;
 export const SelectError=(state:RootState)=>state.content.error;
 
 export default contentSlice.reducer;
+
+export const deleteContent_api =createAsyncThunk(
+    'Content/deleteContent_api',
+    async(contentId:number,{dispatch,rejectWithValue})=>{
+        try{
+            const response=await axios.delete(`http://localhost:8000/signage_app/content/${contentId}`);
+            if(response.status !== 200){
+                console.error('API request failed with status code:',response.status);
+                return rejectWithValue('API request failed');
+            }
+            return response.data;
+        }catch(error:any){
+            console.error('API request failed:',error);
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+export const createContent_api=createAsyncThunk(
+    'Content/createContent_api',
+    async(content:Content,{dispatch,rejectWithValue})=>{
+        try{
+            const response=await axios.post(`http://localhost:8000/signage_app/content/?id=${content.id}`);
+            dispatch(addContent(content));
+            return response.data;
+        }catch(error:any){
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
 
 
 

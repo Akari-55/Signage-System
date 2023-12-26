@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import styles from "./Content.module.css";
@@ -13,14 +13,16 @@ import{
     SelectContentGroupMember,
     deleteContent,
     addContent,
+    deleteContent_api,
 } from './contentSlice'
+
 //Content一覧表示
 export const ContentDisplay=()=>{
-    const dispatch=useDispatch();
+    const dispatch:AppDispatch=useDispatch();
     const contents=useSelector(SelectContent);
     const [searchTerm,setSearchTerm] = useState('');
     const [contentType,setContentType] = useState('all');
-    const [contentStatus,setContentStatus] = useState('未使用');
+    const [contentStatus,setContentStatus] = useState('未公開');
     const [SelectedContentIds,setSelectedContentIds] = useState<Set<number>>(new Set());
     const [isModalOpen,setIsModalOpen]=useState(false);
 
@@ -30,7 +32,7 @@ export const ContentDisplay=()=>{
     const handleContentTypeChange=(type:'all' | 'image' | 'video')=>{
         setContentType(type);
     };
-    const handleContentStatusChange=(type:'使用中' | '未使用')=>{
+    const handleContentStatusChange=(type:'公開中' | '未公開')=>{
         setContentStatus(type);
     }
     const handleCheckboxChange = (id:number) =>{
@@ -50,6 +52,7 @@ export const ContentDisplay=()=>{
     const handleConfirmDelete =()=>{
         SelectedContentIds.forEach(id=>{
             dispatch(deleteContent(id));
+            dispatch(deleteContent_api(id));
         });
         setSelectedContentIds(new Set());//選択をクリア
         setIsModalOpen(false); //モーダルを閉じる
@@ -66,7 +69,7 @@ export const ContentDisplay=()=>{
     });
     return(
         <div>
-            <button onClick={handleDeleteClick}>削除</button>
+            <button onClick={handleConfirmDelete}>削除</button>
             <input type="text"
                     placeholder="検索"
                     value={searchTerm}
@@ -75,12 +78,13 @@ export const ContentDisplay=()=>{
             <button onClick={() => handleContentTypeChange('all')}>すべて</button>
             <button onClick={() =>handleContentTypeChange('image')}>画像のみ</button>
             <button onClick={() =>handleContentTypeChange('video')}>動画のみ</button>
-            <button onClick={() =>handleContentStatusChange('使用中')}>使用中</button>
-            <button onClick={()=>handleContentStatusChange('未使用')}>未使用</button>
+            <button onClick={() =>handleContentStatusChange('公開中')}>使用中</button>
+            <button onClick={()=>handleContentStatusChange('未公開')}>未使用</button>
             <table>
-                <div>
+                
                     <thead>
                         <tr>
+                            <th>選択</th>
                             <th>ステータス</th>
                             <th>コンテンツタイトル</th>
                             <th>コンテンツの詳細</th>
@@ -89,25 +93,25 @@ export const ContentDisplay=()=>{
                         </tr>
                     </thead>
                     <tbody>
-                    {filterdContents.map((content,index)=>(
-                        <div key={index}>
-                            <tr>
+                    {filterdContents.map((contents)=>(
+                            <tr key={contents.id}>
                                 <th>
                                     <input type="checkbox" 
-                                            checked={SelectedContentIds.has(content.id)} 
-                                            onChange={()=>handleCheckboxChange(content.id)}/>
+                                            checked={SelectedContentIds.has(contents.id)} 
+                                            onChange={()=>handleCheckboxChange(contents.id)}/>
                                 </th>
-                                <th>{content.status}</th>
-                                <th>{content.title}</th>
-                                <th>{content.description}</th>
-                                <th>{content.updated_at}</th>
-                                <th>{content.created_at}</th>
+                                <th>{contents.status}</th>
+                                <th>{contents.title}</th>
+                                <th>{contents.description}</th>
+                                <th>{contents.updated_at}</th>
+                                <th>{contents.created_at}</th>
                             </tr>
-                        </div>
                     ))}
                     </tbody>
-                </div>
+                
             </table>
+            {contents.map((content)=>(
+                <div key={content.id}>
             {isModalOpen &&(
                 <Modal
                     onConfirm={handleConfirmDelete}
@@ -115,12 +119,15 @@ export const ContentDisplay=()=>{
                         <p>コンテンツを削除してもよろしいですか?</p>
                     </Modal>
             )}
+            </div>
+            ))}
         </div>
     )
 }
 //コンテンツの新規作成
 export const ContentCreator=()=>{
     const dispatch=useDispatch();
+    const contents=useSelector(SelectContent);
     const currentMonitorId=useSelector(SelectCurrentMonitorId);
     const[title,setTitle]=useState('');
     const[description,setDescription]=useState('');
@@ -149,17 +156,17 @@ export const ContentCreator=()=>{
         formData.append('content_type',contentType);
         formData.append('status','未使用')
 
-        try{
-            const response=await axios.post('http://loaclhost:8000/signage_app/content?monitor_id=${monitor_id}',formData,{
-                headers:{
-                    'Content-Type':'multipart/form-data',
-                },
-            });
-            
-            dispatch(addContent(response.data));
-        } catch(error){
-            console.error('コンテンツ作成中にエラーが発生しました:',error);
-        }
+        // try{
+            // const response=await axios.post(`http://loaclhost:8000/signage_app/content/${}`,formData,{
+                // headers:{
+                    // 'Content-Type':'multipart/form-data',
+                // },
+            // });
+            // 
+            // dispatch(addContent(response.data));
+        // } catch(error){
+            // console.error('コンテンツ作成中にエラーが発生しました:',error);
+        // }
     };
     //ファイル入力の変更を処理する
     const handleFileChange =(e:React.ChangeEvent<HTMLInputElement>)=>{

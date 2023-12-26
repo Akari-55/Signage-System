@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -57,7 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'signage_config.urls'
@@ -81,11 +82,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'signage_config.wsgi.application'
 
 #フロント側との通信を許可する
-CORS_ORIGIN_WHITELIST=[
-        'http://localhost:3000'
+CORS_ALLOWD_ORIGINS=[
+    'http://localhost:3000',
 ]
-
+CORS_ALLOW_ALL_ORIGINS=True
 REST_FRAMEWORK={
+    
         'DEFAUT_PERMISSION_CLASSES':[
             'rest_framework.permissions.IsAuthenticated',
         ],

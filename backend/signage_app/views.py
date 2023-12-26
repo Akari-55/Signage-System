@@ -8,8 +8,9 @@ class ContentViewSet(viewsets.ModelViewSet):
     serializer_class=ContentSerializer
 
     def destroy(self,request,*args,**kwargs):
-        response={'message':'DELETE mothod is not allowed'}
-        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+        instance=self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_No_CONTENT)
 
     def update(self,request,*args,**kwargs):
         response={'message':'UPDATE method is not allowed'}
@@ -29,6 +30,12 @@ class ContentViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers=self.get_success_headers(serializer.data)
         return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)
+    
+    def retrieve(self,request,*args,**kwargs):
+        print('ok')
+        instance=self.get_object()
+        serializer=self.get_serializer(instance)
+        return Response(serializer.data)
 
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset=Device.objects.all()
@@ -108,3 +115,4 @@ class ContentGroupMemberViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers=self.get_success_headers(serializer.data)
         return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)
+    

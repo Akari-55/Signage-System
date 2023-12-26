@@ -13,7 +13,8 @@ router.register('schedule',ScheduleViewSet)
 router.register('contentgroup',ContentGroupViewSet)
 router.register('contentgroupmember',ContentGroupMemberViewSet)
 urlpatterns = [
-    path('',include(router.urls))
+    path('',include(router.urls)),
+    path('signage_app/content/<int:pk>/',ContentViewSet.as_view({'get':'retrieve'}),name='content_detail'),
 
 ]
 if settings.DEBUG:

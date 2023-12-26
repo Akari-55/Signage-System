@@ -12,7 +12,7 @@ class ContentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model=Content
-        fields=['id','title','description','file','content_type','created_at','updated_at','device']
+        fields=['id','title','description','file','content_type','created_at','updated_at','device','status']
 
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
