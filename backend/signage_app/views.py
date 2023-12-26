@@ -10,7 +10,7 @@ class ContentViewSet(viewsets.ModelViewSet):
     def destroy(self,request,*args,**kwargs):
         instance=self.get_object()
         self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_No_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def update(self,request,*args,**kwargs):
         response={'message':'UPDATE method is not allowed'}
@@ -22,7 +22,10 @@ class ContentViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         device_id=self.request.query_params.get('monitor_id')
-        return Content.objects.filter(device__monitor_id=device_id)
+        queryset=Content.objects.order_by('-updated_at')
+        if device_id:
+            queryset=queryset.filter(device__monitor_id=device_id)
+        return queryset
 
     def create(self,request,*args,**kwargs):
         serializer=self.get_serializer(data=request.data)

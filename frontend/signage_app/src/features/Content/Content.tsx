@@ -14,6 +14,7 @@ import{
     deleteContent,
     addContent,
     deleteContent_api,
+    createContent_api,
 } from './contentSlice'
 
 //Content一覧表示
@@ -22,7 +23,7 @@ export const ContentDisplay=()=>{
     const contents=useSelector(SelectContent);
     const [searchTerm,setSearchTerm] = useState('');
     const [contentType,setContentType] = useState('all');
-    const [contentStatus,setContentStatus] = useState('未公開');
+    const [contentStatus,setContentStatus] = useState('all');
     const [SelectedContentIds,setSelectedContentIds] = useState<Set<number>>(new Set());
     const [isModalOpen,setIsModalOpen]=useState(false);
 
@@ -30,10 +31,14 @@ export const ContentDisplay=()=>{
         setSearchTerm(event.target.value);
     };
     const handleContentTypeChange=(type:'all' | 'image' | 'video')=>{
-        setContentType(type);
+        setContentType(prevType=>prevType===type ? 'all':type);
     };
-    const handleContentStatusChange=(type:'公開中' | '未公開')=>{
-        setContentStatus(type);
+    const handleContentStatusChange=(status:'公開' | '未公開' |'all')=>{
+        setContentStatus(prevStatus=>prevStatus === status ? 'all':status);
+    }
+    const resetFilters=()=>{
+        setContentStatus('all');
+        setContentType('all');
     }
     const handleCheckboxChange = (id:number) =>{
         setSelectedContentIds(prev =>{
@@ -64,22 +69,32 @@ export const ContentDisplay=()=>{
         return(
             (content.title.toLowerCase().includes(searchTerm.toLowerCase())) &&
             (contentType === 'all' || content.content_type === contentType) &&
-            (content.status===contentStatus)
+            (contentStatus ==='all' ||content.status===contentStatus)
         );
     });
+    const getButtonClass=(value:string,type:'status'|'type')=>{
+        if(type==='status'){
+            return contentStatus ===value ? 'active':'';
+        }else{
+            return contentType ===value ?'active':'';
+        }
+    }
+    //console.log('Current content:',contents);
+
+
     return(
         <div>
-            <button onClick={handleConfirmDelete}>削除</button>
+            <button onClick={handleDeleteClick}>削除</button>
             <input type="text"
                     placeholder="検索"
                     value={searchTerm}
                     onChange={handleSearchChange}
                     />
-            <button onClick={() => handleContentTypeChange('all')}>すべて</button>
-            <button onClick={() =>handleContentTypeChange('image')}>画像のみ</button>
-            <button onClick={() =>handleContentTypeChange('video')}>動画のみ</button>
-            <button onClick={() =>handleContentStatusChange('公開中')}>使用中</button>
-            <button onClick={()=>handleContentStatusChange('未公開')}>未使用</button>
+            <button onClick={resetFilters} className={contentStatus==='all' &&contentType ==='all'?'activate':''}>すべて</button>
+            <button onClick={() =>handleContentTypeChange('image')}className={getButtonClass('image','type')}>画像のみ</button>
+            <button onClick={() =>handleContentTypeChange('video')}className={getButtonClass('movie','type')}>動画のみ</button>
+            <button onClick={() =>handleContentStatusChange('公開')}className={getButtonClass('公開','status')}>使用中</button>
+            <button onClick={()=>handleContentStatusChange('未公開')}className={getButtonClass('未公開','status')}>未使用</button>
             <table>
                 
                     <thead>
@@ -126,7 +141,7 @@ export const ContentDisplay=()=>{
 }
 //コンテンツの新規作成
 export const ContentCreator=()=>{
-    const dispatch=useDispatch();
+    const dispatch=useDispatch<AppDispatch>();
     const contents=useSelector(SelectContent);
     const currentMonitorId=useSelector(SelectCurrentMonitorId);
     const[title,setTitle]=useState('');
@@ -154,19 +169,8 @@ export const ContentCreator=()=>{
             formData.append('file',file);
         }
         formData.append('content_type',contentType);
-        formData.append('status','未使用')
-
-        // try{
-            // const response=await axios.post(`http://loaclhost:8000/signage_app/content/${}`,formData,{
-                // headers:{
-                    // 'Content-Type':'multipart/form-data',
-                // },
-            // });
-            // 
-            // dispatch(addContent(response.data));
-        // } catch(error){
-            // console.error('コンテンツ作成中にエラーが発生しました:',error);
-        // }
+        formData.append('status','未使用');
+        dispatch(createContent_api({formData}));
     };
     //ファイル入力の変更を処理する
     const handleFileChange =(e:React.ChangeEvent<HTMLInputElement>)=>{

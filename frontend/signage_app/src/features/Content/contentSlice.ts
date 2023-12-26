@@ -20,15 +20,22 @@ const initialState: ContentState={
 export const fetchContent=createAsyncThunk(
     'Content/fetchContent',
     async(monitor_id:number)=>{
-        const response=await axios.get(`http://localhost:8000/signage_app/content?monitor_id=${monitor_id}`,{
-            headers:{
-                "Content-Type":"application/json",
-                //"Cache-Control":"no-store",
-            },
-        });
-        return response.data;
+        console.log('Fetching content ');
+        try{
+            const response=await axios.get(`http://localhost:8000/signage_app/content?monitor_id=${monitor_id}`,{
+                headers:{
+                    "Content-Type":"application/json",
+                    //"Cache-Control":"no-store",
+                },
+            });
+            console.log("Data received:",response.data);
+            return response.data;
+        }catch(error){
+            console.error("Error fetching content:",error);
+            throw error;
+        }
     }
-)
+);
 export const fetchContentGroup=createAsyncThunk(
     'Content/fetchContentGroup',
     async(monitor_id:number)=>{
@@ -51,6 +58,50 @@ export const fetchContentGroupMember=createAsyncThunk(
         return response.data;
     }
 )
+export const deleteContent_api =createAsyncThunk(
+    'Content/deleteContent_api',
+    async(contentId:number,{dispatch,rejectWithValue})=>{
+        try{
+            const response=await axios.delete(`http://localhost:8000/signage_app/content/${contentId}`);
+            if(response.status !== 200){
+                console.error('API request failed with status code:',response.status);
+                return rejectWithValue('API request failed');
+            }
+            return response.data;
+        }catch(error:any){
+            console.error('API request failed:',error);
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+export const createContent_api=createAsyncThunk(
+    'Content/createContent_api',
+    async({formData}:{formData:FormData},thunkAPI)=>{
+        try{
+            const response=await axios.post('http://localhost:8000/signage_app/content/',formData,{
+                headers:{
+                    'Content-Type':'multipart/form-data',
+                },
+            });
+            return response.data;
+        }catch(error:any){
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+export const updateContent_api=createAsyncThunk(
+    'Content/updateContent_api',
+    async(content:Content,{dispatch,rejectWithValue})=>{
+        try{
+            const response=await axios.put(`http://localhost:8000/signage_app/content/${content.id}`);
+            dispatch(updateContent(content));
+            return response.data;
+        }catch(error:any){
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const contentSlice=createSlice({
     name:'content',
     initialState,
@@ -120,6 +171,7 @@ const contentSlice=createSlice({
                 state.error=action.error.message ?? 'エラーが発生しました';
                 state.loading=false;
             })
+            
             .addCase(fetchContentGroup.pending,(state)=>{
                 state.loading=true;
                 state.error=null;
@@ -170,39 +222,6 @@ export const SelectLoading=(state:RootState)=>state.content.loading;
 export const SelectError=(state:RootState)=>state.content.error;
 
 export default contentSlice.reducer;
-
-export const deleteContent_api =createAsyncThunk(
-    'Content/deleteContent_api',
-    async(contentId:number,{dispatch,rejectWithValue})=>{
-        try{
-            const response=await axios.delete(`http://localhost:8000/signage_app/content/${contentId}`);
-            if(response.status !== 200){
-                console.error('API request failed with status code:',response.status);
-                return rejectWithValue('API request failed');
-            }
-            return response.data;
-        }catch(error:any){
-            console.error('API request failed:',error);
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-export const createContent_api=createAsyncThunk(
-    'Content/createContent_api',
-    async(content:Content,{dispatch,rejectWithValue})=>{
-        try{
-            const response=await axios.post(`http://localhost:8000/signage_app/content/?id=${content.id}`);
-            dispatch(addContent(content));
-            return response.data;
-        }catch(error:any){
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
-
-
-
-
 
 
 
