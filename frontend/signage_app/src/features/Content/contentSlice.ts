@@ -62,7 +62,7 @@ export const deleteContent_api =createAsyncThunk(
     'Content/deleteContent_api',
     async(contentId:number,{dispatch,rejectWithValue})=>{
         try{
-            const response=await axios.delete(`http://localhost:8000/signage_app/content/${contentId}`);
+            const response=await axios.delete(`http://localhost:8000/signage_app/content/${contentId}/`);
             if(response.status !== 200){
                 console.error('API request failed with status code:',response.status);
                 return rejectWithValue('API request failed');
@@ -89,11 +89,24 @@ export const createContent_api=createAsyncThunk(
         }
     }
 );
+export const editContent_api=createAsyncThunk(
+    'Content/editContent_api',
+    async(contentId:number,{rejectWithValue})=>{
+        try{
+            const response=await axios.get(`http://localhost:8000/signage_app/content/${contentId}/`);
+            return response.data;
+        }catch(error:any){
+            return rejectWithValue(error.response.data);
+        }
+        }
+);
 export const updateContent_api=createAsyncThunk(
     'Content/updateContent_api',
     async(content:Content,{dispatch,rejectWithValue})=>{
+        console.log("Sending PUT Request with data:",content);
         try{
-            const response=await axios.put(`http://localhost:8000/signage_app/content/${content.id}`);
+
+            const response=await axios.put(`http://localhost:8000/signage_app/content/${content.id}/`,content);
             dispatch(updateContent(content));
             return response.data;
         }catch(error:any){
@@ -101,7 +114,25 @@ export const updateContent_api=createAsyncThunk(
         }
     }
 );
-
+interface UploadFileParams{
+    numericId:number;
+    formData:FormData;
+}
+export const uploadContentFile_api=createAsyncThunk(
+    'Content/uploadContentFile_api',
+    async({numericId,formData}:UploadFileParams,{getState})=>{
+        try{
+            const response=await axios.post(`http://localhost:8000/signage_app/content/${numericId}/upload/`,formData,{
+                headers:{
+                    'Content-Type': 'multipart/form-data', 
+                },
+            });
+            return response.data;
+        } catch(error){
+            throw error;
+        }
+    }
+)
 const contentSlice=createSlice({
     name:'content',
     initialState,

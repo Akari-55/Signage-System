@@ -1,6 +1,6 @@
 import React from 'react';
 import {BrowserRouter as Router,Routes,Route, BrowserRouter,Outlet} from 'react-router-dom';
-import {CreateContentButton,ContentCreator,ContentDisplay} from './features/Content/Content';
+import {CreateContentButton,ContentCreator,ContentDisplay,ContentEdit} from './features/Content/Content';
 import{DeviceSelector} from './features/Core/Core';
 import logo from './logo.svg';
 import './App.css';
@@ -10,6 +10,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage/>}/>
         <Route path="/create-content" element={<ContentCreator/>}/>
+        <Route path="/edit/:id" element={<ContentEdit/>}/>
       </Routes>
     </Router>
 );

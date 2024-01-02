@@ -94,6 +94,7 @@ REST_FRAMEWORK={
         'DEFAULT_AUTHENTICATION_CLASSES':[
             'rest_framework_simplejwt.authentication.JWTAuthentication',
         ],
+        
 }
 SIMPLE_JWT={
         'AUTH_HEADER_TYPES':('JWT',),
@@ -151,6 +152,7 @@ STATIC_URL='/static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 AUTH_USER_MODEL='signage_app.User'
 # メディアファイルに関する設定

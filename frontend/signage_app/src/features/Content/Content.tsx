@@ -1,10 +1,11 @@
 import React,{useState,useEffect} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate ,useParams} from 'react-router-dom';
 import axios from "axios";
 import styles from "./Content.module.css";
 import {useSelector,useDispatch} from "react-redux";
 import {AppDispatch} from "../../app/store";
 import {Modal} from "../Core/Core";
+import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
 import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
 import{
@@ -15,8 +16,19 @@ import{
     addContent,
     deleteContent_api,
     createContent_api,
+    updateContent_api,
+    editContent_api,
+    uploadContentFile_api
 } from './contentSlice'
-
+const initialDevice:Device={
+    id:-1,
+    serial_number:"",
+    monitor_id:null,
+    name:"",
+    location:"",
+    status:"inactive",
+    last_active:new Date().toISOString(),
+}
 //Content一覧表示
 export const ContentDisplay=()=>{
     const dispatch:AppDispatch=useDispatch();
@@ -79,6 +91,11 @@ export const ContentDisplay=()=>{
             return contentType ===value ?'active':'';
         }
     }
+    //編集画面ボタン
+    const navigate=useNavigate();
+    const handleContentEdit=(id:number)=>{
+            navigate(`/edit/${id}`);
+}
     //console.log('Current content:',contents);
 
 
@@ -100,11 +117,13 @@ export const ContentDisplay=()=>{
                     <thead>
                         <tr>
                             <th>選択</th>
+                            <td>
                             <th>ステータス</th>
                             <th>コンテンツタイトル</th>
                             <th>コンテンツの詳細</th>
                             <th>更新日</th>
                             <th>作成日</th>
+                            </td>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,11 +134,13 @@ export const ContentDisplay=()=>{
                                             checked={SelectedContentIds.has(contents.id)} 
                                             onChange={()=>handleCheckboxChange(contents.id)}/>
                                 </th>
+                                <td key={contents.id} onClick={()=>handleContentEdit(contents.id)}>
                                 <th>{contents.status}</th>
                                 <th>{contents.title}</th>
                                 <th>{contents.description}</th>
                                 <th>{contents.updated_at}</th>
                                 <th>{contents.created_at}</th>
+                                </td>
                             </tr>
                     ))}
                     </tbody>
@@ -147,6 +168,7 @@ export const ContentCreator=()=>{
     const[title,setTitle]=useState('');
     const[description,setDescription]=useState('');
     const[file,setFile]=useState<File | null>(null);
+    
 
     const handleSubmit=async(e:React.FormEvent<HTMLFormElement>)=>{
         e.preventDefault();
@@ -208,3 +230,232 @@ export const CreateContentButton=()=>{
         <button onClick={navigateToCreateContent}>新規コンテンツ作成</button>
     );
 };
+function isString(value:any){
+    return typeof value === 'string' || value instanceof String;
+}
+
+//編集画面
+export const ContentEdit=()=>{
+    const {id}=useParams<{id:string}>();
+    //console.log(id);
+    const navigate=useNavigate();
+    const dispatch=useDispatch<AppDispatch>();
+    const content=useSelector((state:RootState)=>{
+        const numericId=id ? parseInt(id):null;
+        return state.content.contents.find(c=>c.id === numericId);
+    });
+    const[editData,setEditData]=useState<Partial<Content>>({
+        id:-1,
+        title:"",
+        description:"",
+        device:initialDevice,
+        status:"draft",
+        content_type:"text",
+        created_at:new Date().toISOString(),
+        updated_at:new Date().toISOString(),
+    });
+    const [fileData,setFileData]=useState<File|null>(null);
+    useEffect(()=>{
+        if(id){
+            const numericId=parseInt(id);
+            if(!isNaN(numericId)){
+                dispatch(editContent_api(numericId));
+            }
+        }
+    },[id,dispatch]);
+
+    useEffect(()=>{
+        if(content){
+            setEditData({
+                title:content.title,
+                description:content.description,
+                device:content.device,
+                status:content.status,
+                content_type:content.content_type,
+                created_at:content.created_at,
+                updated_at:content.updated_at,
+                file:content.file,
+            });
+            setFileData(content.file);
+        }
+    },[content]);
+    useEffect(()=>{
+        console.log('Edit Data Changed:',editData);
+    },[editData]);
+    const handleInputChange=(e:any)=>{
+        const {name,value}=e.target;
+        setEditData(prev=>({
+            ...prev,
+            [name]:value,
+        }));
+    };
+    const handleFileChange=(event:any)=>{
+        setFileData(event.target.files[0]);
+    }
+    const handleSubmit=async(e:any)=>{
+        e.preventDefault();
+        console.log(fileData);
+        if(!editData.title || !editData.description ||!editData.content_type || !editData.status){
+            console.error('All fields are required.');
+            return;
+        }
+        if (!isString(editData.title) || !isString(editData.description) || !isString(editData.content_type) || !isString(editData.status)) {
+            // エラーメッセージを表示するなどのハンドリングをここに書く
+            console.error("Title and Description must be strings.");
+            return; // 送信を中断
+        }else{
+            console.log("ok");
+        }
+        
+        if(editData && id){
+            const formData=new FormData();
+            Object.keys(editData).forEach(key=>{
+                const value=editData[key];
+                formData.append(key, editData[key]);
+                    
+                    if(typeof value==='number'){
+                        formData.append(key,value.toString());
+                    }else if(value instanceof File){
+                        formData.append(key,value,value.name);
+                    }else if(typeof value === 'string'){
+                        formData.append(key,value);
+                    }else if(typeof value === 'object' && key==='Device'){ 
+                        formData.append(key,JSON.stringify(value));
+                    }
+                
+            })
+            if(fileData && fileData instanceof Blob){
+                formData.append('file',fileData,fileData.name);
+                try{
+                    const numericId=parseInt(id);
+                    await dispatch(uploadContentFile_api({numericId,formData}));
+                    navigate('/');
+                }catch(error){
+                    console.error("An error occurred",error);
+                }
+            }
+            try{
+                await dispatch(updateContent_api({...editData as Content,file:fileData}));
+                // await dispatch(updateContent_api(formData));
+            }catch(error){
+                console.error("An error occurrd while updating content",error);
+            }
+        }
+    };
+
+    return(
+        <div>
+            <h1>編集</h1>
+            <form onSubmit={handleSubmit} encType="multipart/form-data">
+                <div>
+                    <label>Title:</label>
+                    <input type="text"
+                            name="title"
+                            value={editData.title || ''}
+                            onChange={handleInputChange}
+                            />
+                </div>
+                <div>
+                    <label>description:</label>
+                    <textarea 
+                            name="description"
+                            value={editData.description || ''}
+                            onChange={handleInputChange}
+                            />
+                </div>
+                <div>
+                    <label>File:</label>
+                    <span>{fileData ? fileData.name: 'No file selected'}</span>
+                    <input type="file"
+                            name="file"
+                            onChange={handleFileChange}
+                            />
+                </div>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    )
+}
+// export const ContentEdit=()=>{
+//     const {contentId}=useParams();
+//     console.log("URLから取得したcontentId:",contentId);
+//     const parsedContentId=contentId ? parseInt(contentId):null;
+
+//     const navigate=useNavigate();
+//     const dispatch=useDispatch<AppDispatch>();
+//     const contents=useSelector(SelectContent);
+//     const contentToEdit=parsedContentId !== null ? contents.find(content=>content.id === parsedContentId):null;
+//     const[originalContent,setOriginalContent]=useState(contentToEdit);
+//     const [title,setTitle]=useState(contentToEdit?.title || ``);
+//     const [description,setDescription]=useState(contentToEdit?.description || '');
+//     const [file,setFile]=useState<File | null>(null);
+
+//     useEffect(()=>{
+//         if(contentToEdit){
+//             setOriginalContent(contentToEdit);
+//             setTitle(contentToEdit.title);
+//             setDescription(contentToEdit.description);
+//             console.log('Edit Data Changed:',contentToEdit);
+//         }
+//     },[contentToEdit]);
+//     const handleFileChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
+//         if(e.target.files && e.target.files.length >0){
+//             setFile(e.target.files[0]);
+//         }
+//     };
+//     const handleSubmit=async(e:React.FormEvent<HTMLFormElement>)=>{
+//         e.preventDefault();
+//         if(!contentToEdit){
+//             alert('編集するコンテンツが選択されていません');
+//             return;
+//         }
+//         let formData=new FormData();
+//         if(title !== originalContent?.title){
+//             formData.append('title',title);
+//         }
+//         if(description !== originalContent?.description){
+//             formData.append(`description`,description);
+//         }
+//         if(file){
+//             formData.append('file',file);
+//         }
+//         console.log("data:",formData);
+//         if(formData.has('title') || formData.has('description')|| formData.has(`file`)){
+//             dispatch(updateContent_api({id:contentToEdit.id,formData}));
+//         }else{
+//             alert("変更が検出されませんでした");
+//         }
+//         navigate(`/`);
+//     };
+//     return(
+//         <div>
+//             <h1>編集</h1>
+//             <form onSubmit={handleSubmit} encType="multipart/form-data">
+//                 <div>
+//                     <label>Title:</label>
+//                     <input type="text"
+//                             name="title"
+//                             value={title}
+//                             onChange={(e)=>setTitle(e.target.value)}
+//                             />
+//                 </div>
+//                 <div>
+//                     <label>description:</label>
+//                     <textarea 
+//                             name="description"
+//                             value={description}
+//                             onChange={(e)=>setDescription(e.target.value)}
+//                             />
+//                 </div>
+//                 <div>
+//                     <label>File:</label>
+//                     <input type="file"
+//                             name="file"
+//                             onChange={handleFileChange}
+//                             />
+//                 </div>
+//                 <button type="submit">Save Changes</button>
+//             </form>
+//         </div>
+//     )
+// };

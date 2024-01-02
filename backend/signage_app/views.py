@@ -1,11 +1,15 @@
 from rest_framework import status,viewsets
-from .serializers import ContentSerializer,DeviceSerializer,ScheduleSerializer,ContentGroupMemberSerializer,ContentGroupSerializer
+from rest_framework.parsers import MultiPartParser,FormParser,JSONParser
+from rest_framework.views import APIView
+from .serializers import ContentSerializer,FileSerializer,DeviceSerializer,ScheduleSerializer,ContentGroupMemberSerializer,ContentGroupSerializer
 from .models import Content,Device,Schedule,ContentGroupMember,ContentGroup
 from rest_framework.response import Response
+import logging
 
 class ContentViewSet(viewsets.ModelViewSet):
     queryset=Content.objects.all()
     serializer_class=ContentSerializer
+    parser_classes=(MultiPartParser,FormParser,JSONParser)
 
     def destroy(self,request,*args,**kwargs):
         instance=self.get_object()
@@ -13,12 +17,42 @@ class ContentViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def update(self,request,*args,**kwargs):
-        response={'message':'UPDATE method is not allowed'}
-        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+        logger=logging.getLogger(__name__)
+        
+        try:
+            print("Received PUT Request for Content:")
+            print("Request Data:", request.data)
+            print("Files Data:",request.FILES) 
+        
+            content=self.get_object()
+            serializer=self.get_serializer(content,data={**request.data,**request.FILES})
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
+            else: 
+                print(serializer.errors)
+            
+        except Exception as e:
+            logger.error(f"Update error: {str(e)}")  # エラーをログに記録
+            print(f"Update error: {str(e)}")  # エラーをコンソールに出力
+            return Response({'messate':str(e)},status=status.HTTP_400_BAD_REQUEST)
+    def upload_file(self,request,pk=None):
+        content=self.get_object()
+        file=request.FILES.get('file')
+        if file:
+            content.file.save(file.name,file,save=True)
+            return Response({"message":"File uploaded successfully!"},status=status.HTTP_200_OK)
+        else:
+            return Response({"message":"No file was provided ."},status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self,request,*args,**kwargs):
-        response={'message':'PATCH method is not allowed'}
-        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+        instance=self.get_object()
+        serializer=self.get_serializer(instance,data=request.data,partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
     def get_queryset(self):
         device_id=self.request.query_params.get('monitor_id')
@@ -39,6 +73,17 @@ class ContentViewSet(viewsets.ModelViewSet):
         instance=self.get_object()
         serializer=self.get_serializer(instance)
         return Response(serializer.data)
+    
+class FileUploadView(APIView):
+    parser_classes=[MultiPartParser,FormParser]
+    def post(self,request,*args,**kwargs):
+        file_serializer=FileSerializer(data=request.data)
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response(file_serializer.data,status=status.HTTP_201_CREATED)
+        else:
+            return Response(file_serializer.error,status=status.HTTP_400_BAD_REQUEST)
+        
 
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset=Device.objects.all()

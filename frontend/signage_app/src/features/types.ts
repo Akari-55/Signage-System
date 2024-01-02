@@ -8,11 +8,12 @@ export interface Device{
     last_active:string;
 }
 export interface Content{
+    [key:string]:any;
     id:number;
     title:string;
     device:Device;
     description:string;
-    file:string;
+    file:File|null;
     status:string;
     content_type:string;
     created_at:string;

@@ -2,7 +2,7 @@ from django.urls import include,path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import routers
-from .views import ContentViewSet,DeviceViewSet,ScheduleViewSet,ContentGroupViewSet,ContentGroupMemberViewSet
+from .views import ContentViewSet,FileUploadView,DeviceViewSet,ScheduleViewSet,ContentGroupViewSet,ContentGroupMemberViewSet
 
 
 app_name = 'signage_app'
@@ -15,6 +15,8 @@ router.register('contentgroupmember',ContentGroupMemberViewSet)
 urlpatterns = [
     path('',include(router.urls)),
     path('signage_app/content/<int:pk>/',ContentViewSet.as_view({'get':'retrieve'}),name='content_detail'),
+    path('signage_app/content/edit/<int:pk>/',ContentViewSet.as_view({'get':'retrieve'})),
+    path('signage_app/content/<int:pk>/upload/',FileUploadView.as_view(),name='file-upload'),
 
 ]
 if settings.DEBUG:

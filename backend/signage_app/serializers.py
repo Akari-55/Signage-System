@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Content,Device,Schedule,ContentGroup,ContentGroupMember
+from .models import Content,FileModel,Device,Schedule,ContentGroup,ContentGroupMember
 from django.contrib.contenttypes.models import ContentType
 
 class ContentSerializer(serializers.ModelSerializer):
@@ -14,6 +14,10 @@ class ContentSerializer(serializers.ModelSerializer):
         model=Content
         fields=['id','title','description','file','content_type','created_at','updated_at','device','status']
 
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=FileModel
+        fields=('file','description','uploaded_at')
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model=Device
