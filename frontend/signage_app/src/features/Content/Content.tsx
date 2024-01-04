@@ -12,6 +12,7 @@ import{
     SelectContent,
     SelectContentGroup,
     SelectContentGroupMember,
+    SelectContentById,
     deleteContent,
     addContent,
     deleteContent_api,
@@ -29,6 +30,14 @@ const initialDevice:Device={
     status:"inactive",
     last_active:new Date().toISOString(),
 }
+// async function createFile=(originalFileurl:string)=>{
+//     const response =await fetch(originalFileurl);
+//     const Blob=await response.blob();
+//     return Blob;
+    // const data=new Blob([originalFile],{type:originalFile.type});
+    // const file=new File([data],originalFile.name,{type:originalFile.type});
+    // return file;
+//}
 //Content一覧表示
 export const ContentDisplay=()=>{
     const dispatch:AppDispatch=useDispatch();
@@ -42,7 +51,7 @@ export const ContentDisplay=()=>{
     const handleSearchChange = (event:React.ChangeEvent<HTMLInputElement>)=>{
         setSearchTerm(event.target.value);
     };
-    const handleContentTypeChange=(type:'all' | 'image' | 'video')=>{
+    const handleContentTypeChange=(type:'all' | 'image' | 'movie')=>{
         setContentType(prevType=>prevType===type ? 'all':type);
     };
     const handleContentStatusChange=(status:'公開' | '未公開' |'all')=>{
@@ -109,7 +118,7 @@ export const ContentDisplay=()=>{
                     />
             <button onClick={resetFilters} className={contentStatus==='all' &&contentType ==='all'?'activate':''}>すべて</button>
             <button onClick={() =>handleContentTypeChange('image')}className={getButtonClass('image','type')}>画像のみ</button>
-            <button onClick={() =>handleContentTypeChange('video')}className={getButtonClass('movie','type')}>動画のみ</button>
+            <button onClick={() =>handleContentTypeChange('movie')}className={getButtonClass('movie','type')}>動画のみ</button>
             <button onClick={() =>handleContentStatusChange('公開')}className={getButtonClass('公開','status')}>使用中</button>
             <button onClick={()=>handleContentStatusChange('未公開')}className={getButtonClass('未公開','status')}>未使用</button>
             <table>
@@ -163,6 +172,7 @@ export const ContentDisplay=()=>{
 //コンテンツの新規作成
 export const ContentCreator=()=>{
     const dispatch=useDispatch<AppDispatch>();
+    const navigate=useNavigate();
     const contents=useSelector(SelectContent);
     const currentMonitorId=useSelector(SelectCurrentMonitorId);
     const[title,setTitle]=useState('');
@@ -193,6 +203,7 @@ export const ContentCreator=()=>{
         formData.append('content_type',contentType);
         formData.append('status','未使用');
         dispatch(createContent_api({formData}));
+        navigate('/');
     };
     //ファイル入力の変更を処理する
     const handleFileChange =(e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -240,10 +251,13 @@ export const ContentEdit=()=>{
     //console.log(id);
     const navigate=useNavigate();
     const dispatch=useDispatch<AppDispatch>();
-    const content=useSelector((state:RootState)=>{
-        const numericId=id ? parseInt(id):null;
-        return state.content.contents.find(c=>c.id === numericId);
-    });
+    // const content=useSelector((state:RootState)=>{
+    //     const numericId=id ? parseInt(id):null;
+    //     return state.content.contents.find(c=>c.id === numericId);
+    // });
+    
+    const numericId=id ? parseInt(id):0;
+    const content=useSelector((state:RootState)=>SelectContentById(state,numericId));
     const[editData,setEditData]=useState<Partial<Content>>({
         id:-1,
         title:"",
@@ -263,10 +277,11 @@ export const ContentEdit=()=>{
             }
         }
     },[id,dispatch]);
-
+    
     useEffect(()=>{
         if(content){
             setEditData({
+                id:content.id,
                 title:content.title,
                 description:content.description,
                 device:content.device,
@@ -291,6 +306,7 @@ export const ContentEdit=()=>{
     };
     const handleFileChange=(event:any)=>{
         setFileData(event.target.files[0]);
+        //console.log("File:",typeof setFileData)
     }
     const handleSubmit=async(e:any)=>{
         e.preventDefault();
@@ -324,18 +340,49 @@ export const ContentEdit=()=>{
                     }
                 
             })
+            //console.log(fileData);
             if(fileData && fileData instanceof Blob){
+                console.log("aaa");
                 formData.append('file',fileData,fileData.name);
-                try{
-                    const numericId=parseInt(id);
-                    await dispatch(uploadContentFile_api({numericId,formData}));
-                    navigate('/');
-                }catch(error){
-                    console.error("An error occurred",error);
-                }
+                // try{
+                //     const numericId=parseInt(id);
+                //     await dispatch(uploadContentFile_api({numericId,formData}));
+                // }catch(error){
+                //     console.error("An error occurred",error);
+                // }
             }
             try{
-                await dispatch(updateContent_api({...editData as Content,file:fileData}));
+                //const fileType=fileData.type.split('/')[0];
+                if(fileData !==null){
+                    //const fileType=fileData.type.split('/')[0];
+                    //console.log("FileType:",fileType);
+                    //const file=createFile(fileData);
+                    if(editData !==null){
+                        const response=await fetch(`http://localhost:8000/signage_app/content/${editData.id}/serve_file/`);
+                        const blob=await response.blob();
+
+                        const file=new File([blob],`${editData.title}.jpg`,{type:blob.type});
+                        console.log("File:",file);
+                        console.log(file.name);
+                        await dispatch(updateContent_api({...editData as Content,file:file}));
+                    }
+                //     fetch(`http://localhost:8000/signage_app/content/${editData.id}/serve_file/`)
+                //         .then(response => response.blob())  // レスポンスからBlobオブジェクトを取得
+                //         .then(blob => {
+                // // Blobオブジェクトを利用する。例えば、BlobからオブジェクトURLを作成し、img要素のsrc属性に設定する。
+                //         const url = URL.createObjectURL(blob);
+                //         const fileData=url;
+                //         console.log(url);  // これはBlobオブジェクトに対応するURLです
+                //     });
+                // const data=new Blob([fileData],{type:'image/jpeg'});
+                // const file=new File([data],"filename.JPG",{type:"image/jpeg"})
+                    // console.log(editData)
+                    // console.log("File Data:",fileData);
+                    // console.log(typeof fileData);
+                    // await dispatch(updateContent_api({...editData as Content,file:fileData}));
+                }
+                //await dispatch(updateContent_api({...editData as Content,file:fileData}));
+                navigate('/');
                 // await dispatch(updateContent_api(formData));
             }catch(error){
                 console.error("An error occurrd while updating content",error);
@@ -373,9 +420,11 @@ export const ContentEdit=()=>{
                 </div>
                 <button type="submit">Save Changes</button>
             </form>
+            {/* <img id="myImage"/> */}
         </div>
     )
 }
+
 // export const ContentEdit=()=>{
 //     const {contentId}=useParams();
 //     console.log("URLから取得したcontentId:",contentId);

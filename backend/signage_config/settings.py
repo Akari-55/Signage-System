@@ -152,7 +152,17 @@ STATIC_URL='/static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+# デフォルト設定
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
 
+CELERY_BROKER_URL = os.environ.get('REDIS_TLS')
+CELERY_ACCEPT_CONTENT = ['pickle', 'application/json']
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_BACKEND = 'django-db'
 
 AUTH_USER_MODEL='signage_app.User'
 # メディアファイルに関する設定

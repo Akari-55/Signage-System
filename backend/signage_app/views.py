@@ -4,7 +4,13 @@ from rest_framework.views import APIView
 from .serializers import ContentSerializer,FileSerializer,DeviceSerializer,ScheduleSerializer,ContentGroupMemberSerializer,ContentGroupSerializer
 from .models import Content,Device,Schedule,ContentGroupMember,ContentGroup
 from rest_framework.response import Response
+from django.http import FileResponse
+from rest_framework.decorators import action
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
+from celery import shared_task
+
 import logging
+
 
 class ContentViewSet(viewsets.ModelViewSet):
     queryset=Content.objects.all()
@@ -18,32 +24,54 @@ class ContentViewSet(viewsets.ModelViewSet):
 
     def update(self,request,*args,**kwargs):
         logger=logging.getLogger(__name__)
-        
         try:
-            print("Received PUT Request for Content:")
-            print("Request Data:", request.data)
-            print("Files Data:",request.FILES) 
-        
             content=self.get_object()
-            serializer=self.get_serializer(content,data={**request.data,**request.FILES})
+            data = {key: value for key, value in request.data.items() if key != 'file'}
+            # data=request.data.copy()
+            
+            file=request.FILES.get('file')
+            if isinstance(file, (InMemoryUploadedFile, TemporaryUploadedFile)):
+                # ファイルは 'FILE' 型です
+                # ここでファイルの処理を行うことができます
+                content.file.save(file.name, file, save=True)
+                data['file'] = content.file
+                
+            else:
+                # ファイルではない場合のエラー処理を行います
+                print("ファイルではありません。")
+            # if file:
+            #     content.file.save(file.name,file,save=True)
+            #     data['file']=content.file.url
+            new_request_data = data.copy()
+            for key, value in request.data.items():
+                if key != 'file':
+                    new_request_data[key] = value
+            # for key in data.keys():
+            #     if isinstance(data[key],list):
+            #         data[key]=data[key][0]
+            print("Received PUT Request for Content:")
+            print("Request Data:", new_request_data)
+            print("Files Data:",request.FILES) 
+            serializer=self.get_serializer(content,data=new_request_data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(serializer.data)
             else: 
                 print(serializer.errors)
+                return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
             logger.error(f"Update error: {str(e)}")  # エラーをログに記録
             print(f"Update error: {str(e)}")  # エラーをコンソールに出力
             return Response({'messate':str(e)},status=status.HTTP_400_BAD_REQUEST)
-    def upload_file(self,request,pk=None):
-        content=self.get_object()
-        file=request.FILES.get('file')
-        if file:
-            content.file.save(file.name,file,save=True)
-            return Response({"message":"File uploaded successfully!"},status=status.HTTP_200_OK)
-        else:
-            return Response({"message":"No file was provided ."},status=status.HTTP_400_BAD_REQUEST)
+    # def upload_file(self,request,pk=None):
+    #     content=self.get_object()
+    #     file=request.FILES.get('file')
+    #     if file:
+    #         content.file.save(file.name,file,save=True)
+    #         return Response({"message":"File uploaded successfully!"},status=status.HTTP_200_OK)
+    #     else:
+    #         return Response({"message":"No file was provided ."},status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self,request,*args,**kwargs):
         instance=self.get_object()
@@ -74,7 +102,15 @@ class ContentViewSet(viewsets.ModelViewSet):
         serializer=self.get_serializer(instance)
         return Response(serializer.data)
     
+    @action(detail=True,methods=['get'])
+    def serve_file(self,request,pk=None):
+        content=self.get_object()
+        file_handle=content.file.open()
+        response=FileResponse(file_handle,content_type='application/octet-stream')
+        response['Content-Disposition']='attachment;filename="%s"' % content.file.name
+        return response    
 class FileUploadView(APIView):
+    print("ok!!")
     parser_classes=[MultiPartParser,FormParser]
     def post(self,request,*args,**kwargs):
         file_serializer=FileSerializer(data=request.data)

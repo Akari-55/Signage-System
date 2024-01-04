@@ -17,7 +17,7 @@ class ContentSerializer(serializers.ModelSerializer):
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model=FileModel
-        fields=('file','description','uploaded_at')
+        fields=('file','uploaded_at')
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model=Device

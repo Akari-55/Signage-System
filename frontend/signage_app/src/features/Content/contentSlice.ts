@@ -100,20 +100,52 @@ export const editContent_api=createAsyncThunk(
         }
         }
 );
-export const updateContent_api=createAsyncThunk(
+// export const updateContent_api=createAsyncThunk(
+//     'Content/updateContent_api',
+//     async(content:Content,{dispatch,rejectWithValue})=>{
+//         console.log("Sending PUT Request with data:",content);
+//         try{
+//             const response=await axios.put(`http://localhost:8000/signage_app/content/${content.id}/`,content);
+//             dispatch(updateContent(content));
+//             return response.data;
+//         }catch(error:any){
+//             return rejectWithValue(error.response.data);
+//         }
+//     }
+// );
+export const updateContent_api = createAsyncThunk(
     'Content/updateContent_api',
-    async(content:Content,{dispatch,rejectWithValue})=>{
-        console.log("Sending PUT Request with data:",content);
-        try{
+    async(content: Content, { dispatch, rejectWithValue }) => {
+        console.log("Sending PUT Request with data:", content);
 
-            const response=await axios.put(`http://localhost:8000/signage_app/content/${content.id}/`,content);
+        // FormDataの作成
+        const formData = new FormData();
+        Object.keys(content).forEach(key => {
+            formData.append(key, content[key]);
+        });
+
+        // ファイルがある場合のみ追加
+        if (content.file) {
+            console.log("okaa");
+            formData.append('file', content.file);
+        }
+
+        try {
+            // Content-Typeをmultipart/form-dataに設定してリクエストを送信
+            const response = await axios.put(`http://localhost:8000/signage_app/content/${content.id}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
             dispatch(updateContent(content));
             return response.data;
-        }catch(error:any){
+        } catch (error:any) {
             return rejectWithValue(error.response.data);
         }
     }
 );
+
 interface UploadFileParams{
     numericId:number;
     formData:FormData;
@@ -122,6 +154,7 @@ export const uploadContentFile_api=createAsyncThunk(
     'Content/uploadContentFile_api',
     async({numericId,formData}:UploadFileParams,{getState})=>{
         try{
+            console.log(numericId);
             const response=await axios.post(`http://localhost:8000/signage_app/content/${numericId}/upload/`,formData,{
                 headers:{
                     'Content-Type': 'multipart/form-data', 
@@ -253,7 +286,9 @@ export const SelectLoading=(state:RootState)=>state.content.loading;
 export const SelectError=(state:RootState)=>state.content.error;
 
 export default contentSlice.reducer;
-
+export const SelectContentById=(state:RootState,contentId:number)=>{
+    return state.content.contents.find(content=>content.id===contentId);
+}
 
 
 
