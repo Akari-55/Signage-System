@@ -145,7 +145,22 @@ export const updateContent_api = createAsyncThunk(
         }
     }
 );
-
+export const deleteContentGroup_api =createAsyncThunk(
+    'ContentGroup/deleteContentGroup_api',
+    async(contentId:number,{dispatch,rejectWithValue})=>{
+        try{
+            const response=await axios.delete(`http://localhost:8000/signage_app/contentgroup/${contentId}/`);
+            if(response.status !== 200){
+                console.error('API request failed with status code:',response.status);
+                return rejectWithValue('API request failed');
+            }
+            return response.data;
+        }catch(error:any){
+            console.error('API request failed:',error);
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
 interface UploadFileParams{
     numericId:number;
     formData:FormData;

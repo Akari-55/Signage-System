@@ -8,6 +8,7 @@ from django.http import FileResponse
 from rest_framework.decorators import action
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from celery import shared_task
+from mimetypes import guess_type
 
 import logging
 
@@ -103,12 +104,26 @@ class ContentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=True,methods=['get'])
-    def serve_file(self,request,pk=None):
+    def get_file(self,request,pk=None):
         content=self.get_object()
         file_handle=content.file.open()
-        response=FileResponse(file_handle,content_type='application/octet-stream')
+        guessed_content_type, _ = guess_type(content.file.name)
+        if not guessed_content_type:
+            guessed_content_type='application/octet-stream'
+        response=FileResponse(file_handle,content_type=guessed_content_type)
         response['Content-Disposition']='attachment;filename="%s"' % content.file.name
-        return response    
+        return response
+    @action(detail=True,methods=['put'])
+    def update_file(self,request,pk=None):
+        content=self.get_object()
+        file=request.data.get('file')
+        if file:
+            content.file = file  # 新しいファイルで更新
+            content.save()  # 変更を保存
+
+            return Response({'status': 'file updated'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'status': 'no file provided'}, status=status.HTTP_400_BAD_REQUEST)    
 class FileUploadView(APIView):
     print("ok!!")
     parser_classes=[MultiPartParser,FormParser]

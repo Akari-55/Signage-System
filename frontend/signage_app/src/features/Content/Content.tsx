@@ -7,7 +7,7 @@ import {AppDispatch} from "../../app/store";
 import {Modal} from "../Core/Core";
 import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
-import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
+import {Content,Device} from '../types';
 import{
     SelectContent,
     SelectContentGroup,
@@ -304,9 +304,31 @@ export const ContentEdit=()=>{
             [name]:value,
         }));
     };
-    const handleFileChange=(event:any)=>{
-        setFileData(event.target.files[0]);
-        //console.log("File:",typeof setFileData)
+    const handleFileChange=async(event:any)=>{
+        // setFileData(event.target.files[0]);
+        if(event.target.files.length>0){
+            const file=event.target.files[0];
+            setFileData(file);
+            if(editData !==null){
+                const fileFormData=new FormData();
+                fileFormData.append('file',file);
+                try{
+                    const response=await fetch(`http://localhost:8000/signage_app/content/${editData.id}/update_file/`,{
+                        method:`PUT`,
+                        body:fileFormData,
+                    });
+                    if(response.ok){
+                        console.log("ファイル更新成功");
+                        // 必要に応じて状態を更新する
+                    } else {
+                        console.error("サーバーエラー");
+                    }
+                }catch (error) {
+                    console.error("更新中にエラーが発生しました:", error);
+                }
+            }
+        }
+        
     }
     const handleSubmit=async(e:any)=>{
         e.preventDefault();
@@ -340,6 +362,8 @@ export const ContentEdit=()=>{
                     }
                 
             })
+            console.log("File:",setFileData)
+            console.log("File:",fileData)
             //console.log(fileData);
             if(fileData && fileData instanceof Blob){
                 console.log("aaa");
@@ -355,13 +379,17 @@ export const ContentEdit=()=>{
                 //const fileType=fileData.type.split('/')[0];
                 if(fileData !==null){
                     //const fileType=fileData.type.split('/')[0];
-                    //console.log("FileType:",fileType);
+                    //console.log("FileType:",typeof fileData);
                     //const file=createFile(fileData);
                     if(editData !==null){
-                        const response=await fetch(`http://localhost:8000/signage_app/content/${editData.id}/serve_file/`);
+                        const response=await fetch(`http://localhost:8000/signage_app/content/${editData.id}/get_file/`);
+                        console.log("response:",fileData);
                         const blob=await response.blob();
+                        const fileExtension=blob.type.split('/')[1];
+                        const fileName=`${editData.title}.${fileExtension}`;
+                        console.log("fileName:",fileName);
 
-                        const file=new File([blob],`${editData.title}.jpg`,{type:blob.type});
+                        const file=new File([blob],fileName,{type:blob.type});
                         console.log("File:",file);
                         console.log(file.name);
                         await dispatch(updateContent_api({...editData as Content,file:file}));
