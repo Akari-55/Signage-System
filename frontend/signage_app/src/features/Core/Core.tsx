@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from 'react';
 import {useSelector,useDispatch} from 'react-redux';
 import {fetchDevice,setCurrentMonitorId} from '../Device/deviceSlice';
-import {fetchContent} from '../Content/contentSlice';
+import {fetchContent, fetchContentGroup} from '../Content/contentSlice';
 import {RootState,AppDispatch} from '../../app/store';
 import{Device} from '../types';
 
@@ -17,6 +17,7 @@ export const DeviceSelector=()=>{
         if(selectedMonitor){
             dispatch(setCurrentMonitorId(selectedMonitor));
             dispatch(fetchContent(Number(selectedMonitor)));
+            dispatch(fetchContentGroup(Number(selectedMonitor)));
         }
     },[selectedMonitor,dispatch]);
     return(

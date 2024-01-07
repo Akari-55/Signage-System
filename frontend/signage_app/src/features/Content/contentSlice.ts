@@ -39,11 +39,13 @@ export const fetchContent=createAsyncThunk(
 export const fetchContentGroup=createAsyncThunk(
     'Content/fetchContentGroup',
     async(monitor_id:number)=>{
+        console.log('Fetching content Group');
         const response =await axios.get(`http://localhost:8000/signage_app/contentgroup?monitor_id=${monitor_id}`,{
             headers:{
                 "Content-Type":"application/json",
             },
         });
+        console.log("Data received:",response.data);
         return response.data;
     }
 )
@@ -63,7 +65,7 @@ export const deleteContent_api =createAsyncThunk(
     async(contentId:number,{dispatch,rejectWithValue})=>{
         try{
             const response=await axios.delete(`http://localhost:8000/signage_app/content/${contentId}/`);
-            if(response.status !== 200){
+            if(response.status !== 204){
                 console.error('API request failed with status code:',response.status);
                 return rejectWithValue('API request failed');
             }
@@ -146,11 +148,11 @@ export const updateContent_api = createAsyncThunk(
     }
 );
 export const deleteContentGroup_api =createAsyncThunk(
-    'ContentGroup/deleteContentGroup_api',
+    'Content/deleteContentGroup_api',
     async(contentId:number,{dispatch,rejectWithValue})=>{
         try{
             const response=await axios.delete(`http://localhost:8000/signage_app/contentgroup/${contentId}/`);
-            if(response.status !== 200){
+            if(response.status !== 204){
                 console.error('API request failed with status code:',response.status);
                 return rejectWithValue('API request failed');
             }
@@ -257,6 +259,7 @@ const contentSlice=createSlice({
             })
             .addCase(fetchContentGroup.fulfilled,(state,action)=>{
                 //コンテンツグループデータの取得に成功した場合の処理
+                console.log("ok");
                 state.contentGroups=action.payload;
                 state.loading=false;
             })

@@ -10,13 +10,14 @@ router=routers.DefaultRouter()
 router.register(r'content',ContentViewSet)
 router.register('device',DeviceViewSet)
 router.register('schedule',ScheduleViewSet)
-router.register('contentgroup',ContentGroupViewSet)
+router.register(r'contentgroup',ContentGroupViewSet)
 router.register('contentgroupmember',ContentGroupMemberViewSet)
 urlpatterns = [
     path('',include(router.urls)),
     path('content/<int:pk>/',ContentViewSet.as_view({'get':'retrieve'}),name='content_detail'),
     path('content/edit/<int:pk>/',ContentViewSet.as_view({'get':'retrieve'})),
     path('content/<int:pk>/upload/',FileUploadView.as_view(),name='file-upload'),
+    path('contentgroup/<int:pk>/',ContentGroupViewSet.as_view({'get':'retrieve'}),name='contentgroup_detail'),
     
 
 ]

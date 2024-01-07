@@ -7,7 +7,7 @@ import {AppDispatch} from "../../app/store";
 import {Modal} from "../Core/Core";
 import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
-import {Content,Device} from '../types';
+import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
 import{
     SelectContent,
     SelectContentGroup,

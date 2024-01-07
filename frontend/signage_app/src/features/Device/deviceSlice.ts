@@ -6,12 +6,14 @@ interface DeviceState{
     devices:Device[];
     isOn:boolean;
     currentContent:string | null;
+    currentContentGoup:string|null;
     currentMonitorId:string | null;
 }
 const initialState:DeviceState={
     devices:[],
     isOn:false,
     currentContent:null,
+    currentContentGoup:null,
     currentMonitorId:null,
 };
 export const fetchDevice=createAsyncThunk(
@@ -43,6 +45,9 @@ export const deviceSlice = createSlice({
         setCurrentContent:(state,action:PayloadAction<string>)=>{
             state.currentContent=action.payload;
         },
+        setCurrentContentGroup:(state,action:PayloadAction<string>)=>{
+            state.currentContentGoup=action.payload;
+        },
         selectDevice:(state,action)=>{
             const monitorId=action.payload;
             state.currentMonitorId=monitorId;
@@ -59,7 +64,7 @@ export const deviceSlice = createSlice({
     }
 });
 
-export const {toggleDevice,setCurrentContent,selectDevice,setCurrentMonitorId}=deviceSlice.actions;
+export const {toggleDevice,setCurrentContent,setCurrentContentGroup,selectDevice,setCurrentMonitorId}=deviceSlice.actions;
 export const SelectCurrentMonitorId=(state:RootState)=>state.device.currentMonitorId;
 export const SelectDevice=(state:RootState)=>state.device.devices;
 

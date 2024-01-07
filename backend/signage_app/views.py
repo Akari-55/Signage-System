@@ -175,14 +175,19 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 class ContentGroupViewSet(viewsets.ModelViewSet):
     queryset=ContentGroup.objects.all()
     serializer_class=ContentGroupSerializer
+    print("ok")
 
     def get_queryset(self):
         device_id=self.request.query_params.get('monitor_id')
-        return Content.objects.filter(device__monitor_id=device_id)
+        queryset=ContentGroup.objects.all()
+        if device_id:
+            queryset=queryset.filter(device__monitor_id=device_id)
+        return queryset
 
     def destoroy(self,request,*args,**kwargs):
-        response={'message':'DELETE method is not allowed'}
-        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+        instance=self.get_object()
+        self.perform_destroy(instance)
+        return Response(satus=status.HTTP_204_NO_CONTENT)
 
     def update(self,request,*args,**kwargs):
         response={'message':'UPDATE method is not allowed'}
@@ -191,6 +196,11 @@ class ContentGroupViewSet(viewsets.ModelViewSet):
     def partial_update(self,request,*args,**kwargs):
         response={'message':'PATCH method is not allowed'}
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
+    def retrive(self,request,* args,**kwargs):
+        print('ok')
+        instance=self.get_object()
+        serializer=self.get_serializer(instance)
+        return Response(serializer.data)
 
 class ContentGroupMemberViewSet(viewsets.ModelViewSet):
     queryset=ContentGroupMember.objects.all()
@@ -214,4 +224,8 @@ class ContentGroupMemberViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers=self.get_success_headers(serializer.data)
         return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)
+    def retrive(self,request,* args,**kwargs):
+        instance=self.get_object()
+        serializer=self.get_serializer(instance)
+        return Response(serializer.data)
     

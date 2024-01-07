@@ -20,7 +20,8 @@ import{
     updateContent_api,
     editContent_api,
     uploadContentFile_api,
-    deleteContentGroup
+    deleteContentGroup,
+    fetchContentGroup
 } from './contentSlice'
 
 const initialDevice:Device={
@@ -43,6 +44,7 @@ export const ContentGroupDisplay=()=>{
     const handleSearchChange=(event:React.ChangeEvent<HTMLInputElement>)=>{
         setSearchTerm(event.target.value);
     }
+    console.log(contentgroups);
     const handleContentGroupStatusChange=(status:'公開'|'未公開'|'all')=>{
         setContentGroupStatus(prevStatus=>prevStatus ===status ? 'all':status);
     }
