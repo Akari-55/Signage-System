@@ -184,7 +184,7 @@ class ContentGroupViewSet(viewsets.ModelViewSet):
             queryset=queryset.filter(device__monitor_id=device_id)
         return queryset
 
-    def destoroy(self,request,*args,**kwargs):
+    def destroy(self,request,*args,**kwargs):
         instance=self.get_object()
         self.perform_destroy(instance)
         return Response(satus=status.HTTP_204_NO_CONTENT)
@@ -196,17 +196,23 @@ class ContentGroupViewSet(viewsets.ModelViewSet):
     def partial_update(self,request,*args,**kwargs):
         response={'message':'PATCH method is not allowed'}
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
-    def retrive(self,request,* args,**kwargs):
+    def retrieve(self,request,* args,**kwargs):
         print('ok')
         instance=self.get_object()
         serializer=self.get_serializer(instance)
         return Response(serializer.data)
+    def create(self,request,*args,**kwargs):
+        serializer=self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers=self.get_success_headers(serializer.data)
+        return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)
 
 class ContentGroupMemberViewSet(viewsets.ModelViewSet):
     queryset=ContentGroupMember.objects.all()
     serializer_class=ContentGroupMemberSerializer
 
-    def destoroy(self,request,*args,**kwargs):
+    def destroy(self,request,*args,**kwargs):
         response={'message':'DELETE method is not allowed'}
         return Response(response,status=status.HTTP_400_BAD_REQUEST)
 
@@ -224,7 +230,7 @@ class ContentGroupMemberViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers=self.get_success_headers(serializer.data)
         return Response(serializer.data,status=status.HTTP_201_CREATED,headers=headers)
-    def retrive(self,request,* args,**kwargs):
+    def retrieve(self,request,* args,**kwargs):
         instance=self.get_object()
         serializer=self.get_serializer(instance)
         return Response(serializer.data)

@@ -16,12 +16,16 @@ import{
     deleteContent,
     addContent,
     deleteContentGroup_api,
+    createContentGroup_api,
+    createContentGroupMember_api,
+    addContentGroupMember,
     createContent_api,
     updateContent_api,
     editContent_api,
     uploadContentFile_api,
     deleteContentGroup,
-    fetchContentGroup
+    fetchContentGroup,
+    fetchContent,
 } from './contentSlice'
 
 const initialDevice:Device={
@@ -142,4 +146,129 @@ export const ContentGroupDisplay=()=>{
         </div>
     )
 
+}
+//コンテンツグループの新規作成
+// export const CreateContentGroup=()=>{
+//     const[name,setName]=useState('');
+//     const [description,setDescription]=useState('');
+//     const [selectedContents,setSelectedContents]=useState<number[]>([]);
+//     const dispatch=useDispatch<AppDispatch>();
+//     const contents=useSelector(SelectContent);
+//     const currentMonitorId=useSelector(SelectCurrentMonitorId);
+
+//     useEffect(()=>{
+//         const monitorId=Number(currentMonitorId);
+//         if(!isNaN(monitorId)){
+//             dispatch(fetchContent(monitorId));
+//         }
+//     },[dispatch,currentMonitorId]);
+
+//     const handleCheckboxChange=(contentId:number)=>{
+//         setSelectedContents(prev=>{
+//             if(prev.includes(contentId)){
+//                 return prev.filter(id=>id!==contentId);
+//             }else{
+//                 return[...prev,contentId];
+//             }
+//         })
+//     };
+//     const handleSubmit=async(e:React.FormEvent<HTMLFormElement>)=>{
+//         e.preventDefault();
+//         const formData=new FormData();
+//         formData.append('name',name);
+//         formData.append('description',description);
+//         dispatch(createContentGroup_api({formData})).then((action)=>{
+//             if(createContentGroup_api.fulfilled.match(action)){
+//                 const contentGroupId=action.payload.id;
+//                 selectedContents.forEach(contentId=>{
+//                     const memberData={id:1,group:contentGroupId,content:contentId,order:selectedContents.indexOf(contentId)+1};
+//                     dispatch(addContentGroupMember(memberData));
+//                 })
+//             }
+//         }
+//         )
+//     }
+// }
+//コンテンツグループの新規作成
+export const CreateContentGroup=()=>{
+    const dispatch=useDispatch<AppDispatch>();
+    const navigate=useNavigate();
+    const contents=useSelector(SelectContent);
+    const [selectedContents,setSelectedContents]=useState<number[]>([]);
+    const [groupName,setGroupName]=useState('');
+    const [description,setDescription]=useState('');
+    const currentMonitorId=useSelector(SelectCurrentMonitorId);
+    useEffect(()=>{
+        const monitorId=Number(currentMonitorId);
+        if(!isNaN(monitorId)){
+            dispatch(fetchContent(monitorId));
+        }
+    },[dispatch,currentMonitorId]);
+    const handleContentSelect=(contentId:number)=>{
+        setSelectedContents(prev=>{
+            if(prev.includes(contentId)){
+                return prev.filter(id=>id!==contentId);
+            }else{
+                return[...prev,contentId];
+            }
+        })
+    };
+    const handleSubmit=async()=>{
+        if(!currentMonitorId){
+            alert('モニターが選択されていません');
+            return;
+        }
+        const groupformData=new FormData();
+        groupformData.append('name',groupName);
+        groupformData.append('description',description);
+        groupformData.append('device',currentMonitorId);
+        groupformData.append('status','未使用');
+        const groupResponse=await dispatch(createContentGroup_api({formData:groupformData}));
+        if(createContentGroup_api.fulfilled.match(groupResponse)){
+            const groupId=groupResponse.payload.id;
+            selectedContents.forEach(async(contentId,index)=>{
+                const memberFormData=new FormData();
+                console.log("ContentId:",contentId.toString());
+                memberFormData.append('group',groupId.toString());
+                memberFormData.append('content',contentId.toString());
+                memberFormData.append('order',index.toString());
+                dispatch(createContentGroupMember_api({formData:memberFormData}));
+            })
+            navigate('/');
+        }
+    };
+    return(
+        <div>
+            <h2>新規コンテンツグループを作成</h2>
+            <input 
+                type="text"
+                value={groupName}
+                onChange={(e)=>setGroupName(e.target.value)}/>
+            <textarea
+                value={description}
+                onChange={(e)=>setDescription(e.target.value)}>
+            </textarea>
+            <div>
+                {contents.map(content=>(
+                    <div key={content.id}>
+                        <input 
+                            type="checkbox"
+                            checked={selectedContents.includes(content.id)}
+                            onChange={()=>handleContentSelect(content.id)}/>
+                        {content.title}
+                    </div>
+                ))}
+            </div>
+            <button onClick={handleSubmit}>新規作成</button>
+        </div>
+    )
+}
+export const CreateContentGroupButton=()=>{
+    const navigate=useNavigate();
+    const navigateToCreateContentGroup=()=>{
+        navigate('/create-content-group');
+    };
+    return(
+        <button onClick={navigateToCreateContentGroup}>新規コンテンツグループを作成</button>
+    )
 }

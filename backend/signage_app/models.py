@@ -70,6 +70,7 @@ class ContentGroupMember(models.Model):
 
     class Meta:
         ordering=['order']
+        unique_together=[['group','content']]
     def __str__(self):
         return f"{self.group}-{self.content}"
 

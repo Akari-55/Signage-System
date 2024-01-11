@@ -40,11 +40,11 @@ class ScheduleSerializer(serializers.ModelSerializer):
         return serializer.data
 
 class ContentGroupMemberSerializer(serializers.ModelSerializer):
-    content=ContentSerializer(read_only=True)
+    # content=ContentSerializer(read_only=True)
 
     class Meta:
         model=ContentGroupMember
-        fields=['order','content']
+        fields=['id','order','content','group']
 
 class ContentGroupSerializer(serializers.ModelSerializer):
 

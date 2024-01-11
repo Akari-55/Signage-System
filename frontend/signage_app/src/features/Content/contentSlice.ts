@@ -163,6 +163,36 @@ export const deleteContentGroup_api =createAsyncThunk(
         }
     }
 );
+export const createContentGroup_api=createAsyncThunk(
+    'Content/createContentGroup_api',
+    async({formData}:{formData:FormData},thunkAPI)=>{
+        try{
+            const response=await axios.post(`http://localhost:8000/signage_app/contentgroup/`,formData,{
+                headers:{
+                    'Content-Type':'multipart/form-data',
+                },
+            });
+            return response.data;
+        }catch(error:any){
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+export const createContentGroupMember_api=createAsyncThunk(
+    'Content/createContentGroup_api',
+    async({formData}:{formData:FormData},thunkAPI)=>{
+        try{
+            const response=await axios.post(`http://localhost:8000/signage_app/contentgroupmember/`,formData,{
+                headers:{
+                    'Content-Type':'multipart/form-data',
+                },
+            });
+            return response.data;
+        }catch(error:any){
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
 interface UploadFileParams{
     numericId:number;
     formData:FormData;
