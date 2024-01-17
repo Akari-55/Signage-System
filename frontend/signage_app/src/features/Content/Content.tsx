@@ -392,6 +392,11 @@ export const ContentEdit=()=>{
                         const file=new File([blob],fileName,{type:blob.type});
                         console.log("File:",file);
                         console.log(file.name);
+                        if(file && 'type'in file){
+                            const fileType=file.type.split('/')[0];
+                            if(fileType ==='image')editData.content_type='image';
+                            else if(fileType==='video')editData.content_type='movie';
+                        }
                         await dispatch(updateContent_api({...editData as Content,file:file}));
                     }
                 //     fetch(`http://localhost:8000/signage_app/content/${editData.id}/serve_file/`)

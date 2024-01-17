@@ -36,7 +36,7 @@ export interface ContentGroup{
 }
 export interface ContentGroupMember{
     id:number;
-    group:ContentGroup;
-    content:Content;
+    group:number;
+    content:number;
     order:number;
 }

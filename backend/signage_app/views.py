@@ -213,8 +213,10 @@ class ContentGroupMemberViewSet(viewsets.ModelViewSet):
     serializer_class=ContentGroupMemberSerializer
 
     def destroy(self,request,*args,**kwargs):
+        instance=self.get_object()
+        self.perform_destroy(instance)
         response={'message':'DELETE method is not allowed'}
-        return Response(response,status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def update(self,request,*args,**kwargs):
         response={'message':'UPDATE method is not allowed'}

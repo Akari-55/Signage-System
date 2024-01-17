@@ -52,6 +52,7 @@ export const fetchContentGroup=createAsyncThunk(
 export const fetchContentGroupMember=createAsyncThunk(
     'Content/fetchContentGroupMember',
     async()=>{
+        console.log('Fetching content Group Member');
         const response =await axios.get(`http://localhost:8000/signage_app/contentgroupmember`,{
             headers:{
                 "Content-Type":"application/json",
@@ -248,7 +249,7 @@ const contentSlice=createSlice({
         deleteContentGroup:(state,action:PayloadAction<number>)=>{
             state.contentGroups=state.contentGroups.filter(group=>group.id !== action.payload);
             //関連するContentGroupMemberの削除
-            state.contentGroupMembers=state.contentGroupMembers.filter(member=>member.group.id !== action.payload);
+            state.contentGroupMembers=state.contentGroupMembers.filter(member=>member.group !== action.payload);
         },
         //コンテンツグループメンバーの作成
         addContentGroupMember:(state,action:PayloadAction<ContentGroupMember>)=>{
@@ -274,11 +275,13 @@ const contentSlice=createSlice({
             })
             .addCase(fetchContent.fulfilled,(state,action)=>{
                 //コンテンツデータの取得に成功した場合の処理
+                console.log("fetchContent fulfilled, state updated:", action.payload);
                 state.contents=action.payload;
                 state.loading=false;
             })
             .addCase(fetchContent.rejected,(state,action)=>{
                 //エラーが発生した場合の処理
+                console.error("fetchContent failed, error:", action.error.message);
                 state.error=action.error.message ?? 'エラーが発生しました';
                 state.loading=false;
             })
