@@ -4,7 +4,7 @@ import axios from "axios";
 import styles from "./Content.module.css";
 import {useSelector,useDispatch} from "react-redux";
 import {AppDispatch} from "../../app/store";
-import {Modal} from "../Core/Core";
+// import {Modal} from "../Core/Core";
 import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
 import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
@@ -29,7 +29,41 @@ import{
     fetchContentGroupMember,
 } from './contentSlice'
 import { current } from '@reduxjs/toolkit';
-
+interface ModalProps{
+    children:React.ReactNode;
+    onConfirm:()=>void;
+    onCancel:()=>void;
+}
+const Modal : React.FC<ModalProps> = ({ children, onConfirm, onCancel }) => {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      }}>
+        <div style={{
+          padding: '20px',
+          background: 'white',
+          borderRadius: '5px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
+          {children}
+          <div style={{ marginTop: '20px' }}>
+            <button onClick={onConfirm} style={{ marginRight: '10px' }}>はい</button>
+            <button onClick={onCancel}>いいえ</button>
+          </div>
+        </div>
+      </div>
+    )
+}
 const initialDevice:Device={
     id:-1,
     serial_number:"",
@@ -40,7 +74,7 @@ const initialDevice:Device={
     last_active:new Date().toISOString(),
 }
 
-export const ContentGroupDisplay=()=>{
+const ContentGroupDisplay=()=>{
     const dispatch:AppDispatch=useDispatch();
     const contentgroups=useSelector(SelectContentGroup);
     const [searchTerm,setSearchTerm]=useState('');
@@ -192,7 +226,7 @@ export const ContentGroupDisplay=()=>{
 //     }
 // }
 //コンテンツグループの新規作成
-export const CreateContentGroup=()=>{
+const CreateContentGroup=()=>{
     const dispatch=useDispatch<AppDispatch>();
     const navigate=useNavigate();
     const contents=useSelector(SelectContent);
@@ -265,7 +299,7 @@ export const CreateContentGroup=()=>{
         </div>
     )
 }
-export const CreateContentGroupButton=()=>{
+const CreateContentGroupButton=()=>{
     const navigate=useNavigate();
     const navigateToCreateContentGroup=()=>{
         navigate('/create-content-group');
@@ -274,7 +308,7 @@ export const CreateContentGroupButton=()=>{
         <button onClick={navigateToCreateContentGroup}>新規コンテンツグループを作成</button>
     )
 }
-export const DisplaySignageButton=()=>{
+const DisplaySignageButton=()=>{
     const navigate=useNavigate();
     const navigateToDisplaySignage=()=>{
         navigate('/display');
@@ -284,7 +318,7 @@ export const DisplaySignageButton=()=>{
     )
 }
 //コンテンツ表示
-export const DigitalSignage=()=>{
+const DigitalSignage=()=>{
     const[contents,setContents]=useState([]);
     const [currentContentIndex,setCurrentContentIndex]=useState(0);
     const[selectedContents,setSelectedContents]=useState<Content[]>([]);
@@ -383,3 +417,4 @@ export const DigitalSignage=()=>{
         </div>
     );
 };
+export default ContentGroupDisplay

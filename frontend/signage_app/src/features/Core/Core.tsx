@@ -1,14 +1,32 @@
 import React,{useState,useEffect} from 'react';
 import {useSelector,useDispatch} from 'react-redux';
-import {fetchDevice,setCurrentMonitorId} from '../Device/deviceSlice';
+import {fetchDevice,setCurrentMonitorId,SelectCurrentMonitorId,SelectDevice} from '../Device/deviceSlice';
 import {fetchContent, fetchContentGroup} from '../Content/contentSlice';
+import ContentDisplay from '../Content/Content';
+import ContentGroupDisplay from '../Content/ContentGroup';
 import {RootState,AppDispatch} from '../../app/store';
+import { Routes, Route, BrowserRouter,Link,useNavigate } from "react-router-dom";
 import{Device} from '../types';
+import styles from './Core.module.css';
+import{Button,
+        Menu,
+        MenuItem,
+        List,
+        ListItemButton,
+        ListItemIcon,
+        ListItemText,
+      } from '@mui/material'
+import HomeIcon from '@mui/icons-material/Home';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import FolderIcon from '@mui/icons-material/Folder';
 
-export const DeviceSelector=()=>{
-    const dispatch=useDispatch<AppDispatch>();
+const Core:React.FC=()=>{
+  const dispatch=useDispatch<AppDispatch>();
     const devices:Device[]=useSelector((state:RootState) =>state.device.devices);
     const [selectedMonitor,setSelectedMonitor]=useState<string | null>(null);
+    const [anchorEl,setAnchorEl]=React.useState<HTMLElement | null>(null);
+    const open =Boolean(anchorEl);
+    const navigate=useNavigate();
 
     useEffect(()=>{
         dispatch(fetchDevice());
@@ -20,53 +38,87 @@ export const DeviceSelector=()=>{
             dispatch(fetchContentGroup(Number(selectedMonitor)));
         }
     },[selectedMonitor,dispatch]);
+    const handleClick=(event:React.MouseEvent<HTMLButtonElement>)=>{
+      setAnchorEl(event.currentTarget as HTMLElement);
+    }
+    const handleClose=()=>{
+      setAnchorEl(null);
+    }
+    const handleMenuItemClick=(deviceId:string)=>{
+      setSelectedMonitor(deviceId);
+      handleClose();
+    }
+    const handleNavigation=(path:string)=>{
+      navigate(path);
+    }
     return(
-        <div>
-            <select value={selectedMonitor ? selectedMonitor : ''} onChange={(e)=>setSelectedMonitor(e.target.value)}>
-                <option value="">Select a monitor</option>
+      <body>
+      <header className={styles.l_header}>
+        <div className={styles.l_header_inner}>
+          <div className={styles.l_header_setmonitor}>
+            <Button aria-controls="monitor-menu" aria-haspopup="true" onClick={handleClick} className={styles.m_btn_monitor}>
+              {selectedMonitor ? devices.find(device=>device.id === Number(selectedMonitor))?.name:"Select a monitor"}
+            </Button>
+            <Menu
+              id="monitor-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={open}
+              onClose={handleClose}>
                 {devices.map((device)=>(
-                    <option key={device.id} value={device.id}>
-                        {device.name}
-                    </option>
+                  <MenuItem
+                    key={device.id}
+                    selected={device.id === Number(selectedMonitor)}
+                    onClick={()=>handleMenuItemClick(device.id.toString())}
+                    >
+                      {device.name}
+                    </MenuItem>
                 ))}
-            </select>
+
+            </Menu>
+          </div>
         </div>
+      </header>
+      <main style={{height:'100%'}}>
+        <div className={styles.main_content}>
+      <div className={styles.l_sidebar}> 
+        <div className={styles.l_sidebar_inner}>
+          <List>
+            <ListItemButton onClick={()=>handleNavigation('/') } className={styles.l_sidebar_item}>
+              <ListItemIcon>
+                <HomeIcon/>
+              </ListItemIcon>
+              <ListItemText primary="ホーム"/>
+            </ListItemButton>
+            <ListItemButton onClick={()=>handleNavigation('/contents')} className={styles.l_sidebar_item}>
+              <ListItemIcon>
+                <InsertDriveFileIcon />
+              </ListItemIcon>
+              <ListItemText primary="コンテンツ管理"/>
+            </ListItemButton>
+            <ListItemButton onClick={()=>handleNavigation('/groups')} className={styles.l_sidebar_item}>
+              <ListItemIcon>
+                <FolderIcon />
+              </ListItemIcon>
+              <ListItemText primary="グループコンテンツ管理"/>
+            </ListItemButton>
+          </List>
+          
+
+        </div>
+
+      </div>
+      
+      <Routes>
+        <Route path="/" element={<ContentDisplay/>} />
+        <Route path="/contents" element={<ContentDisplay/>} />
+        <Route path="/groups" element={<ContentGroupDisplay/>} />
+      </Routes>
+      </div>
+      </main>
+      </body>
     );
 }
-// Modal
 
-interface ModalProps{
-    children:React.ReactNode;
-    onConfirm:()=>void;
-    onCancel:()=>void;
-}
-export const Modal : React.FC<ModalProps> = ({ children, onConfirm, onCancel }) => {
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    }}>
-      <div style={{
-        padding: '20px',
-        background: 'white',
-        borderRadius: '5px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}>
-        {children}
-        <div style={{ marginTop: '20px' }}>
-          <button onClick={onConfirm} style={{ marginRight: '10px' }}>はい</button>
-          <button onClick={onCancel}>いいえ</button>
-        </div>
-      </div>
-    </div>
-  );
-};
+
+export default Core

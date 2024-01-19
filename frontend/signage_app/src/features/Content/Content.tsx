@@ -4,7 +4,6 @@ import axios from "axios";
 import styles from "./Content.module.css";
 import {useSelector,useDispatch} from "react-redux";
 import {AppDispatch} from "../../app/store";
-import {Modal} from "../Core/Core";
 import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
 import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
@@ -38,8 +37,43 @@ const initialDevice:Device={
     // const file=new File([data],originalFile.name,{type:originalFile.type});
     // return file;
 //}
+interface ModalProps{
+    children:React.ReactNode;
+    onConfirm:()=>void;
+    onCancel:()=>void;
+}
+const Modal : React.FC<ModalProps> = ({ children, onConfirm, onCancel }) => {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      }}>
+        <div style={{
+          padding: '20px',
+          background: 'white',
+          borderRadius: '5px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
+          {children}
+          <div style={{ marginTop: '20px' }}>
+            <button onClick={onConfirm} style={{ marginRight: '10px' }}>はい</button>
+            <button onClick={onCancel}>いいえ</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 //Content一覧表示
-export const ContentDisplay=()=>{
+const ContentDisplay=()=>{
     const dispatch:AppDispatch=useDispatch();
     const contents=useSelector(SelectContent);
     const [searchTerm,setSearchTerm] = useState('');
@@ -170,7 +204,7 @@ export const ContentDisplay=()=>{
     )
 }
 //コンテンツの新規作成
-export const ContentCreator=()=>{
+const ContentCreator=()=>{
     const dispatch=useDispatch<AppDispatch>();
     const navigate=useNavigate();
     const contents=useSelector(SelectContent);
@@ -232,7 +266,7 @@ export const ContentCreator=()=>{
     );
 };
 //新規作成ボタン
-export const CreateContentButton=()=>{
+const CreateContentButton=()=>{
     const navigate=useNavigate();
     const navigateToCreateContent=()=>{
         navigate('/create-content');//新規作成画面へパスにナビゲート
@@ -246,7 +280,7 @@ function isString(value:any){
 }
 
 //編集画面
-export const ContentEdit=()=>{
+const ContentEdit=()=>{
     const {id}=useParams<{id:string}>();
     //console.log(id);
     const navigate=useNavigate();
@@ -541,3 +575,4 @@ export const ContentEdit=()=>{
 //         </div>
 //     )
 // };
+export default ContentDisplay
