@@ -2,7 +2,7 @@ import React,{useState,useEffect} from 'react';
 import {useSelector,useDispatch} from 'react-redux';
 import {fetchDevice,setCurrentMonitorId,SelectCurrentMonitorId,SelectDevice} from '../Device/deviceSlice';
 import {fetchContent, fetchContentGroup} from '../Content/contentSlice';
-import ContentDisplay from '../Content/Content';
+import ContentPage from '../Content/Content';
 import ContentGroupDisplay from '../Content/ContentGroup';
 import {RootState,AppDispatch} from '../../app/store';
 import { Routes, Route, BrowserRouter,Link,useNavigate } from "react-router-dom";
@@ -110,8 +110,9 @@ const Core:React.FC=()=>{
       </div>
       
       <Routes>
-        <Route path="/" element={<ContentDisplay/>} />
-        <Route path="/contents" element={<ContentDisplay/>} />
+        <Route path="/" element={<ContentPage/>} />
+        <Route path="/contents" element={<ContentPage/>} />
+        
         <Route path="/groups" element={<ContentGroupDisplay/>} />
       </Routes>
       </div>

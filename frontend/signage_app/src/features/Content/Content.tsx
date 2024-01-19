@@ -7,6 +7,7 @@ import {AppDispatch} from "../../app/store";
 import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
 import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
+import { Routes, Route, BrowserRouter,Link } from "react-router-dom";
 import{
     SelectContent,
     SelectContentGroup,
@@ -137,7 +138,7 @@ const ContentDisplay=()=>{
     //編集画面ボタン
     const navigate=useNavigate();
     const handleContentEdit=(id:number)=>{
-            navigate(`/edit/${id}`);
+            navigate(`edit/${id}`);
 }
     //console.log('Current content:',contents);
 
@@ -575,4 +576,14 @@ const ContentEdit=()=>{
 //         </div>
 //     )
 // };
-export default ContentDisplay
+const ContentPage=()=>{
+    return(
+        <div>
+            <ContentDisplay/>
+            <CreateContentButton/>
+
+            
+        </div>
+    )
+}
+export default ContentPage
