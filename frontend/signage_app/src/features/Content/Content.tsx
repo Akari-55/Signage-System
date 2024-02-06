@@ -7,6 +7,19 @@ import {AppDispatch} from "../../app/store";
 import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
 import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
+import{Button,
+    Menu,
+    MenuItem,
+    List,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    AppBar,
+    Box,
+  } from '@mui/material'
+  import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+  import SearchIcon from '@mui/icons-material/Search';
+  import DeleteIcon from '@mui/icons-material/Delete';
 import { Routes, Route, BrowserRouter,Link } from "react-router-dom";
 import{
     SelectContent,
@@ -82,6 +95,7 @@ const ContentDisplay=()=>{
     const [contentStatus,setContentStatus] = useState('all');
     const [SelectedContentIds,setSelectedContentIds] = useState<Set<number>>(new Set());
     const [isModalOpen,setIsModalOpen]=useState(false);
+    const [active,setActive]=useState(false);
 
     const handleSearchChange = (event:React.ChangeEvent<HTMLInputElement>)=>{
         setSearchTerm(event.target.value);
@@ -135,6 +149,7 @@ const ContentDisplay=()=>{
             return contentType ===value ?'active':'';
         }
     }
+
     //編集画面ボタン
     const navigate=useNavigate();
     const handleContentEdit=(id:number)=>{
@@ -144,18 +159,37 @@ const ContentDisplay=()=>{
 
 
     return(
-        <div>
-            <button onClick={handleDeleteClick}>削除</button>
-            <input type="text"
-                    placeholder="検索"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    />
-            <button onClick={resetFilters} className={contentStatus==='all' &&contentType ==='all'?'activate':''}>すべて</button>
-            <button onClick={() =>handleContentTypeChange('image')}className={getButtonClass('image','type')}>画像のみ</button>
-            <button onClick={() =>handleContentTypeChange('movie')}className={getButtonClass('movie','type')}>動画のみ</button>
-            <button onClick={() =>handleContentStatusChange('公開')}className={getButtonClass('公開','status')}>使用中</button>
-            <button onClick={()=>handleContentStatusChange('未公開')}className={getButtonClass('未公開','status')}>未使用</button>
+        <div className={styles.content_list}>
+            <div className={styles.content_sidebar}>
+                <div className={styles.content_search__wrapper}>
+                    <SearchIcon className={styles.content_search__icon}/>
+                    <input type="text"
+                        placeholder="コンテンツを検索"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className={styles.content_search}
+                        />
+                </div>
+                <div className={styles.content_filter}>
+    <button onClick={resetFilters} className={`${contentStatus === 'all' && contentType === 'all' ? styles.activate : ''} ${styles.content_filter__btn}`}>
+        すべて
+    </button>
+    <button onClick={() => handleContentTypeChange('image')} className={`${contentType === 'image' ? styles.active : ''} ${styles.content_filter__btn}`}>
+        画像のみ
+    </button>
+    <button onClick={() => handleContentTypeChange('movie')} className={`${contentType === 'movie' ? styles.active : ''} ${styles.content_filter__btn}`}>
+        動画のみ
+    </button>
+    <button onClick={() => handleContentStatusChange('公開')} className={`${contentStatus === '公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
+        使用中
+    </button>
+    <button onClick={() => handleContentStatusChange('未公開')} className={`${contentStatus === '未公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
+        未使用
+    </button>
+</div>
+
+            </div>
+            <div className={styles.content_table}>
             <table>
                 
                     <thead>
@@ -184,12 +218,14 @@ const ContentDisplay=()=>{
                                 <th>{contents.description}</th>
                                 <th>{contents.updated_at}</th>
                                 <th>{contents.created_at}</th>
+                                <th><button onClick={handleDeleteClick}><DeleteIcon/></button></th>
                                 </td>
                             </tr>
                     ))}
                     </tbody>
                 
             </table>
+            </div>
             {contents.map((content)=>(
                 <div key={content.id}>
             {isModalOpen &&(
@@ -273,7 +309,8 @@ const CreateContentButton=()=>{
         navigate('/create-content');//新規作成画面へパスにナビゲート
     };
     return(
-        <button onClick={navigateToCreateContent}>新規コンテンツ作成</button>
+        // <button onClick={navigateToCreateContent}>新規コンテンツ作成</button>
+        <Button variant="contained" color="primary" onClick={navigateToCreateContent}>新規コンテンツ作成</Button>
     );
 };
 function isString(value:any){
@@ -493,94 +530,21 @@ const ContentEdit=()=>{
     )
 }
 
-// export const ContentEdit=()=>{
-//     const {contentId}=useParams();
-//     console.log("URLから取得したcontentId:",contentId);
-//     const parsedContentId=contentId ? parseInt(contentId):null;
 
-//     const navigate=useNavigate();
-//     const dispatch=useDispatch<AppDispatch>();
-//     const contents=useSelector(SelectContent);
-//     const contentToEdit=parsedContentId !== null ? contents.find(content=>content.id === parsedContentId):null;
-//     const[originalContent,setOriginalContent]=useState(contentToEdit);
-//     const [title,setTitle]=useState(contentToEdit?.title || ``);
-//     const [description,setDescription]=useState(contentToEdit?.description || '');
-//     const [file,setFile]=useState<File | null>(null);
 
-//     useEffect(()=>{
-//         if(contentToEdit){
-//             setOriginalContent(contentToEdit);
-//             setTitle(contentToEdit.title);
-//             setDescription(contentToEdit.description);
-//             console.log('Edit Data Changed:',contentToEdit);
-//         }
-//     },[contentToEdit]);
-//     const handleFileChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
-//         if(e.target.files && e.target.files.length >0){
-//             setFile(e.target.files[0]);
-//         }
-//     };
-//     const handleSubmit=async(e:React.FormEvent<HTMLFormElement>)=>{
-//         e.preventDefault();
-//         if(!contentToEdit){
-//             alert('編集するコンテンツが選択されていません');
-//             return;
-//         }
-//         let formData=new FormData();
-//         if(title !== originalContent?.title){
-//             formData.append('title',title);
-//         }
-//         if(description !== originalContent?.description){
-//             formData.append(`description`,description);
-//         }
-//         if(file){
-//             formData.append('file',file);
-//         }
-//         console.log("data:",formData);
-//         if(formData.has('title') || formData.has('description')|| formData.has(`file`)){
-//             dispatch(updateContent_api({id:contentToEdit.id,formData}));
-//         }else{
-//             alert("変更が検出されませんでした");
-//         }
-//         navigate(`/`);
-//     };
-//     return(
-//         <div>
-//             <h1>編集</h1>
-//             <form onSubmit={handleSubmit} encType="multipart/form-data">
-//                 <div>
-//                     <label>Title:</label>
-//                     <input type="text"
-//                             name="title"
-//                             value={title}
-//                             onChange={(e)=>setTitle(e.target.value)}
-//                             />
-//                 </div>
-//                 <div>
-//                     <label>description:</label>
-//                     <textarea 
-//                             name="description"
-//                             value={description}
-//                             onChange={(e)=>setDescription(e.target.value)}
-//                             />
-//                 </div>
-//                 <div>
-//                     <label>File:</label>
-//                     <input type="file"
-//                             name="file"
-//                             onChange={handleFileChange}
-//                             />
-//                 </div>
-//                 <button type="submit">Save Changes</button>
-//             </form>
-//         </div>
-//     )
-// };
 const ContentPage=()=>{
     return(
         <div>
+            <div className={styles.content_title_box}>
+                <div className={styles.content_title}>
+                    < InsertDriveFileIcon className={styles.content_title_icon}/>
+                    コンテンツ管理
+                </div>
+                <CreateContentButton/>
+            </div>
+
             <ContentDisplay/>
-            <CreateContentButton/>
+
 
             
         </div>

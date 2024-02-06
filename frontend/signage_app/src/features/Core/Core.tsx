@@ -19,6 +19,7 @@ import{Button,
 import HomeIcon from '@mui/icons-material/Home';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import FolderIcon from '@mui/icons-material/Folder';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const Core:React.FC=()=>{
   const dispatch=useDispatch<AppDispatch>();
@@ -53,7 +54,7 @@ const Core:React.FC=()=>{
     }
     return(
       <body>
-      <header className={styles.l_header}>
+      {/* <header className={styles.l_header}>
         <div className={styles.l_header_inner}>
           <div className={styles.l_header_setmonitor}>
             <Button aria-controls="monitor-menu" aria-haspopup="true" onClick={handleClick} className={styles.m_btn_monitor}>
@@ -78,7 +79,7 @@ const Core:React.FC=()=>{
             </Menu>
           </div>
         </div>
-      </header>
+      </header> */}
       <main style={{height:'100%'}}>
         <div className={styles.main_content}>
       <div className={styles.l_sidebar}> 
@@ -108,13 +109,44 @@ const Core:React.FC=()=>{
         </div>
 
       </div>
-      
-      <Routes>
-        <Route path="/" element={<ContentPage/>} />
+      <div className={styles.l_main_conteiner}>
+        <div className={styles.l_header}>
+          <div className={styles.l_header_inner}>
+            <div className={styles.l_header_setmonitor}>
+              <div className={styles.m_btn_monitor_inner}>
+              <Button aria-controls="monitor-menu" aria-haspopup="true" onClick={handleClick} className={styles.m_btn_monitor}>
+                {selectedMonitor ? devices.find(device=>device.id === Number(selectedMonitor))?.name:"Select a monitor"}
+              </Button>
+              <ExpandMoreIcon className={styles.m_btn_monitor_icon}/>
+              
+              </div>
+              <Menu
+                id="monitor-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={open}
+                onClose={handleClose}>
+                  {devices.map((device)=>(
+                    <MenuItem
+                      key={device.id}
+                      selected={device.id === Number(selectedMonitor)}
+                      onClick={()=>handleMenuItemClick(device.id.toString())}
+                      >
+                        {device.name}
+                      </MenuItem>
+                  ))}
+
+              </Menu>
+            </div>
+          </div>
+        </div>
+        <Routes>
+        <Route path="/" element={<ContentPage/>}/>
         <Route path="/contents" element={<ContentPage/>} />
-        
         <Route path="/groups" element={<ContentGroupDisplay/>} />
       </Routes>
+      </div>
+
       </div>
       </main>
       </body>
