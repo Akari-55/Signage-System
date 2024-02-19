@@ -121,6 +121,13 @@ const ContentDisplay=()=>{
             return newSet;
         });
     };
+    const handleSelectAllChange=(event:React.ChangeEvent<HTMLInputElement>)=>{
+        const newSelectedContentIds=new Set<number>();
+        if(event.target.checked){
+            filterdContents.forEach(content=>newSelectedContentIds.add(content.id));
+        }
+        setSelectedContentIds(newSelectedContentIds);
+    };
     const handleDeleteClick =()=>{
         setIsModalOpen(true)//モーダルを開く
     }
@@ -142,13 +149,13 @@ const ContentDisplay=()=>{
             (contentStatus ==='all' ||content.status===contentStatus)
         );
     });
-    const getButtonClass=(value:string,type:'status'|'type')=>{
-        if(type==='status'){
-            return contentStatus ===value ? 'active':'';
-        }else{
-            return contentType ===value ?'active':'';
-        }
-    }
+    // const getButtonClass=(value:string,type:'status'|'type')=>{
+    //     if(type==='status'){
+    //         return contentStatus ===value ? 'active':'';
+    //     }else{
+    //         return contentType ===value ?'active':'';
+    //     }
+    // }
 
     //編集画面ボタン
     const navigate=useNavigate();
@@ -171,55 +178,57 @@ const ContentDisplay=()=>{
                         />
                 </div>
                 <div className={styles.content_filter}>
-    <button onClick={resetFilters} className={`${contentStatus === 'all' && contentType === 'all' ? styles.activate : ''} ${styles.content_filter__btn}`}>
-        すべて
-    </button>
-    <button onClick={() => handleContentTypeChange('image')} className={`${contentType === 'image' ? styles.active : ''} ${styles.content_filter__btn}`}>
-        画像のみ
-    </button>
-    <button onClick={() => handleContentTypeChange('movie')} className={`${contentType === 'movie' ? styles.active : ''} ${styles.content_filter__btn}`}>
-        動画のみ
-    </button>
-    <button onClick={() => handleContentStatusChange('公開')} className={`${contentStatus === '公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
-        使用中
-    </button>
-    <button onClick={() => handleContentStatusChange('未公開')} className={`${contentStatus === '未公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
-        未使用
-    </button>
-</div>
+                    <button onClick={resetFilters} className={`${contentStatus === 'all' && contentType === 'all' ? styles.activate : ''} ${styles.content_filter__btn}`}>
+                        すべて
+                    </button>
+                    <button onClick={() => handleContentTypeChange('image')} className={`${contentType === 'image' ? styles.active : ''} ${styles.content_filter__btn}`}>
+                        画像のみ
+                    </button>
+                    <button onClick={() => handleContentTypeChange('movie')} className={`${contentType === 'movie' ? styles.active : ''} ${styles.content_filter__btn}`}>
+                        動画のみ
+                    </button>
+                    <button onClick={() => handleContentStatusChange('公開')} className={`${contentStatus === '公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
+                        使用中
+                    </button>
+                    <button onClick={() => handleContentStatusChange('未公開')} className={`${contentStatus === '未公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
+                        未使用
+                    </button>
+    
+                </div>
+                <div className={styles.content_delete__wrapper}>
+                    <button onClick={handleDeleteClick} className={styles.content_delete}><DeleteIcon className={styles.content_delete__icon}/>削除</button>
+                </div>
 
             </div>
             <div className={styles.content_table}>
             <table>
                 
-                    <thead>
+                    <thead className={styles.content_table_head}>
                         <tr>
-                            <th>選択</th>
-                            <td>
-                            <th>ステータス</th>
-                            <th>コンテンツタイトル</th>
-                            <th>コンテンツの詳細</th>
-                            <th>更新日</th>
-                            <th>作成日</th>
-                            </td>
+                            <th className={styles.content_table_label}>
+                                <input type="checkbox"
+                                        onChange={handleSelectAllChange}
+                                        checked={SelectedContentIds.size === filterdContents.length && filterdContents.length >0}/></th>
+                            <th className={styles.content_table_label}>ステータス</th>
+                            <th className={styles.content_table_label}>コンテンツタイトル</th>
+                            <th className={styles.content_table_label}>コンテンツの詳細</th>
+                            <th className={styles.content_table_label}>更新日</th>
+                            <th className={styles.content_table_label}>作成日</th>
                         </tr>
                     </thead>
                     <tbody>
                     {filterdContents.map((contents)=>(
-                            <tr key={contents.id}>
-                                <th>
+                            <tr key={contents.id} >
+                                <td >
                                     <input type="checkbox" 
                                             checked={SelectedContentIds.has(contents.id)} 
                                             onChange={()=>handleCheckboxChange(contents.id)}/>
-                                </th>
-                                <td key={contents.id} onClick={()=>handleContentEdit(contents.id)}>
-                                <th>{contents.status}</th>
-                                <th>{contents.title}</th>
-                                <th>{contents.description}</th>
-                                <th>{contents.updated_at}</th>
-                                <th>{contents.created_at}</th>
-                                <th><button onClick={handleDeleteClick}><DeleteIcon/></button></th>
                                 </td>
+                                <td onClick={()=>handleContentEdit(contents.id)}>{contents.status}</td>
+                                <td onClick={()=>handleContentEdit(contents.id)}>{contents.title}</td>
+                                <td onClick={()=>handleContentEdit(contents.id)}>{contents.description}</td>
+                                <td onClick={()=>handleContentEdit(contents.id)}>{contents.updated_at}</td>
+                                <td onClick={()=>handleContentEdit(contents.id)}>{contents.created_at}</td>
                             </tr>
                     ))}
                     </tbody>
