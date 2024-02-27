@@ -8,6 +8,19 @@ import {AppDispatch} from "../../app/store";
 import {RootState} from "../../app/store";
 import{selectDevice,setCurrentContent,SelectCurrentMonitorId} from '../Device/deviceSlice';
 import {Content,ContentGroup,ContentGroupMember,Device} from '../types';
+import{Button,
+    Menu,
+    MenuItem,
+    List,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    AppBar,
+    Box,
+  } from '@mui/material'
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import SearchIcon from '@mui/icons-material/Search';
+import DeleteIcon from '@mui/icons-material/Delete';
 import{
     SelectContent,
     SelectContentGroup,
@@ -102,6 +115,13 @@ const ContentGroupDisplay=()=>{
             return newSet;
         })
     };
+    const handleSelectAllChange=(event:React.ChangeEvent<HTMLInputElement>)=>{
+        const newSelectedContentIds=new Set<number>();
+        if(event.target.checked){
+            filterdContentGroups.forEach(contentgroup=>newSelectedContentIds.add(contentgroup.id));
+        }
+        setSelectedContentGroupIds(newSelectedContentIds);
+    };
     const handleDeleteClick=()=>{
         setIsModalOpen(true)
     }
@@ -128,46 +148,66 @@ const ContentGroupDisplay=()=>{
         }
     }
     return(
-        <div>
-            <button onClick={handleDeleteClick}>削除</button>
-            <input type="text"
-                    placeholder="検索"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    />
-            <button onClick={resetFilters} className={contentgroupStatus==='all'?'activate':''}>すべて</button>
-            <button onClick={() =>handleContentGroupStatusChange('公開')}className={getButtonClass('公開','status')}>使用中</button>
-            <button onClick={()=>handleContentGroupStatusChange('未公開')}className={getButtonClass('未公開','status')}>未使用</button>
+        <div className={styles.content_list}>
+            <div className={styles.content_sidebar}>
+                <div className={styles.content_search__wrapper}>
+                    <SearchIcon className={styles.content_search__icon}/>
+                    <input type="text"
+                        placeholder="コンテンツグループを検索"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className={styles.content_searh}
+                        />
+                </div>
+                <div className={styles.content_filter}>
+                <button onClick={resetFilters} className={`{contentgroupStatus==='all'?'activate':''} ${styles.content_filter__btn}`} >
+                    すべて
+                </button>
+                <button onClick={() =>handleContentGroupStatusChange('公開')}className={`${contentgroupStatus === '公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
+                    使用中
+                </button>
+            <button onClick={()=>handleContentGroupStatusChange('未公開')} className={`${contentgroupStatus === '未公開' ? styles.active : ''} ${styles.content_filter__btn}`}>
+                未使用
+                </button>
+                </div>
+            <div className={styles.content_delete__wrapper}>
+                <button onClick={handleDeleteClick} className={styles.content_delete}><DeleteIcon className={styles.content_delete__icon}/>削除</button>
+            </div>
+            </div>
+            <div className={styles.content_table}>
             <table>
                 
-                    <thead>
-                        <tr>
-                            <th>選択</th>
+                <thead className={styles.content_table_head}>
+                    <tr>
+                    <th className={styles.content_table_label}>
+                                <input type="checkbox"
+                                        onChange={handleSelectAllChange}
+                                        checked={SelectedContentGroupIds.size === filterdContentGroups.length && filterdContentGroups.length >0}/></th>
+                        <th className={styles.content_table_label}>ステータス</th>
+                        <th className={styles.content_table_label}>コンテンツタイトル</th>
+                        <th className={styles.content_table_label}>コンテンツの詳細</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {filterdContentGroups.map((contentGroups)=>(
+                        <tr key={contentGroups.id}>
                             <td>
-                            <th>ステータス</th>
-                            <th>コンテンツタイトル</th>
-                            <th>コンテンツの詳細</th>
+                                <input type="checkbox" 
+                                        checked={SelectedContentGroupIds.has(contentGroups.id)} 
+                                        onChange={()=>handleCheckboxChange(contentGroups.id)}/>
                             </td>
+                            {/* <td key={contentGroups.id} onClick={()=>handleContentEdit(contentGroups.id)}> */}
+                            <td>{contentGroups.status}</td>
+                            <td>{contentGroups.name}</td>
+                            <td>{contentGroups.description}</td>
+                            {/* </td> */}
                         </tr>
-                    </thead>
-                    <tbody>
-                    {filterdContentGroups.map((contentGroups)=>(
-                            <tr key={contentGroups.id}>
-                                <th>
-                                    <input type="checkbox" 
-                                            checked={SelectedContentGroupIds.has(contentGroups.id)} 
-                                            onChange={()=>handleCheckboxChange(contentGroups.id)}/>
-                                </th>
-                                {/* <td key={contentGroups.id} onClick={()=>handleContentEdit(contentGroups.id)}> */}
-                                <th>{contentGroups.status}</th>
-                                <th>{contentGroups.name}</th>
-                                <th>{contentGroups.description}</th>
-                                {/* </td> */}
-                            </tr>
-                    ))}
-                    </tbody>
-                
-            </table>
+                ))}
+                </tbody>
+            
+        </table>
+            </div>
+            
             {contentgroups.map((contentgroup)=>(
                 <div key={contentgroup.id}>
             {isModalOpen &&(
@@ -225,87 +265,13 @@ const ContentGroupDisplay=()=>{
 //         )
 //     }
 // }
-//コンテンツグループの新規作成
-const CreateContentGroup=()=>{
-    const dispatch=useDispatch<AppDispatch>();
-    const navigate=useNavigate();
-    const contents=useSelector(SelectContent);
-    const [selectedContents,setSelectedContents]=useState<number[]>([]);
-    const [groupName,setGroupName]=useState('');
-    const [description,setDescription]=useState('');
-    const currentMonitorId=useSelector(SelectCurrentMonitorId);
-    useEffect(()=>{
-        const monitorId=Number(currentMonitorId);
-        if(!isNaN(monitorId)){
-            dispatch(fetchContent(monitorId));
-        }
-    },[dispatch,currentMonitorId]);
-    const handleContentSelect=(contentId:number)=>{
-        setSelectedContents(prev=>{
-            if(prev.includes(contentId)){
-                return prev.filter(id=>id!==contentId);
-            }else{
-                return[...prev,contentId];
-            }
-        })
-    };
-    const handleSubmit=async()=>{
-        if(!currentMonitorId){
-            alert('モニターが選択されていません');
-            return;
-        }
-        const groupformData=new FormData();
-        groupformData.append('name',groupName);
-        groupformData.append('description',description);
-        groupformData.append('device',currentMonitorId);
-        groupformData.append('status','未使用');
-        const groupResponse=await dispatch(createContentGroup_api({formData:groupformData}));
-        if(createContentGroup_api.fulfilled.match(groupResponse)){
-            const groupId=groupResponse.payload.id;
-            selectedContents.forEach(async(contentId,index)=>{
-                const memberFormData=new FormData();
-                console.log("ContentId:",contentId.toString());
-                memberFormData.append('group',groupId.toString());
-                memberFormData.append('content',contentId.toString());
-                memberFormData.append('order',index.toString());
-                dispatch(createContentGroupMember_api({formData:memberFormData}));
-            })
-            navigate('/');
-        }
-    };
-    return(
-        <div>
-            <h2>新規コンテンツグループを作成</h2>
-            <input 
-                type="text"
-                value={groupName}
-                onChange={(e)=>setGroupName(e.target.value)}/>
-            <textarea
-                value={description}
-                onChange={(e)=>setDescription(e.target.value)}>
-            </textarea>
-            <div>
-                {contents.map(content=>(
-                    <div key={content.id}>
-                        <input 
-                            type="checkbox"
-                            checked={selectedContents.includes(content.id)}
-                            onChange={()=>handleContentSelect(content.id)}/>
-                        {content.title}
-                    </div>
-                ))}
-            </div>
-            <button onClick={handleSubmit}>新規作成</button>
-        </div>
-    )
-}
 const CreateContentGroupButton=()=>{
     const navigate=useNavigate();
     const navigateToCreateContentGroup=()=>{
-        navigate('/create-content-group');
+        navigate('create-content-group');
     };
     return(
-        <button onClick={navigateToCreateContentGroup}>新規コンテンツグループを作成</button>
+        <Button  variant="contained" color="primary" onClick={navigateToCreateContentGroup}>新規コンテンツグループを作成</Button>
     )
 }
 const DisplaySignageButton=()=>{
@@ -317,104 +283,20 @@ const DisplaySignageButton=()=>{
         <button onClick={navigateToDisplaySignage}>サイネージを表示</button>
     )
 }
-//コンテンツ表示
-const DigitalSignage=()=>{
-    const[contents,setContents]=useState([]);
-    const [currentContentIndex,setCurrentContentIndex]=useState(0);
-    const[selectedContents,setSelectedContents]=useState<Content[]>([]);
-    const contentRef=useRef<HTMLVideoElement|null>(null);
-    const [error,setError]=useState<string|null>(null);
-    const dispatch:AppDispatch=useDispatch();
-    const content=useSelector(SelectContent);
-    const contentgroup=useSelector(SelectContentGroup);
-    const contentgroupmembers=useSelector(SelectContentGroupMember);
-    const currentMonitorId=useSelector(SelectCurrentMonitorId);
-    useEffect(()=>{
-        if(contentgroupmembers.length===0){
-            dispatch(fetchContentGroupMember());
-        }
-    },[dispatch,contentgroupmembers.length]);
-    useEffect(()=>{
-        const publishedContentGroupId=contentgroup
-            .filter(group=>group.status==='使用中')
-            .map(group=>group.id);
-        if(publishedContentGroupId.length>1){
-            setError('公開中のContentGroupが複数存在します');
-        }else if(publishedContentGroupId.length===1){
-            const selectedGroupId=publishedContentGroupId[0];
-            console.log(selectedGroupId);
-            console.log(contentgroupmembers);
-            const relatedContents=contentgroupmembers
-                .filter(member=>{
-                    console.log('Filtering member',member.group);
-                    return member.group ===selectedGroupId;
-                })
-                .map(member=>{
-                    console.log('Mapping member to content:',member);
-                    return content.find(c=>c.id===member.content)
-                })
-                .filter(c=>{
-                    console.log('Filterd content:',c);
-                
-                return c!==undefined;
-            });
-            console.log("Content",relatedContents);
-            setSelectedContents(relatedContents as Content[]);
-        }
-    },[contentgroup,contentgroupmembers,content])
-    useEffect(()=>{
-        if(selectedContents.length===0){
-            return;
-        }
-        const currentContent=selectedContents[currentContentIndex];
-        //console.log(currentContent);
-        const isVideo=currentContent?.type==='movie';
-        const timeoutId=setTimeout(()=>{
-            if(!isVideo || (contentRef.current && contentRef.current.ended)){
-                const nextIndex=(currentContentIndex+1)%selectedContents.length;
-                setCurrentContentIndex(nextIndex);
-            }
 
-        },isVideo? undefined:10000);
-        return()=>{
-            clearTimeout(timeoutId);
-        };
-    },[currentContentIndex,selectedContents])
-    
-    const currentContent=selectedContents[currentContentIndex];
-    console.log(currentContent)
-    const ContentDisplay=({content}:{content:Content}):JSX.Element|null=>{
-        if(!content){
-            return null;
-        }
-        const fileUrl=content.file;
-        console.log("content type",content.content_type);
-        if(fileUrl!=null){
-            switch (content.content_type) {
-                case 'movie':
-                    return (
-                        <video ref={contentRef} src={fileUrl.toString()} autoPlay onEnded={() => setCurrentContentIndex((currentContentIndex + 1) % selectedContents.length )} className={styles.fullscreen_media_video} />
-                    );
-                case 'image':
-                default:
-                    return <img src={fileUrl.toString()} alt={content.title} className={styles.fullscreen_media_img} />;
-            }
-        }else{
-            return<div>表示できるものがありません</div>;
-        }
-    };
+
+const ContentGroupPage=()=>{
     return(
-        <div  className={styles.fullscreen_media}>
-            {/* {currentContent &&(
-                currentContent.type === 'video'?(
-                    <video ref={contentRef} src={currentContent.url} autoPlay onEnded={()=>setCurrentContentIndex((currentContentIndex +1)%selectedContents.length)}/>
-
-                ):(
-                    <img src={currentContent.file} alt={currentContent.name} />
-                )
-            )} */}
-            {currentContent && <ContentDisplay content={currentContent} />}
+        <div>
+            <div className={styles.content_title_box}>
+                <div className={styles.content_title}>
+                    < InsertDriveFileIcon className={styles.content_title_icon}/>
+                    コンテンツグループ管理
+                </div>
+                <CreateContentGroupButton/>
+            </div>
+            <ContentGroupDisplay/>
         </div>
-    );
-};
-export default ContentGroupDisplay
+    )
+}
+export default ContentGroupPage
