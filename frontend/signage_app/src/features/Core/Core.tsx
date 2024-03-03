@@ -3,9 +3,13 @@ import {useSelector,useDispatch} from 'react-redux';
 import {fetchDevice,setCurrentMonitorId,SelectCurrentMonitorId,SelectDevice} from '../Device/deviceSlice';
 import {fetchContent, fetchContentGroup} from '../Content/contentSlice';
 import ContentPage from '../Content/Content';
-import ContentGroupDisplay from '../Content/ContentGroup';
+import ContentCreator from '../Content/ContentCreate';
+import ContentEdit from '../Content/ContentEdit';
+import ContentGroupPage from '../Content/ContentGroup';
+import CreateContentGroup from '../Content/CreateContentGroup';
+import DigitalSignage from '../Content/DigitalSignage';
 import {RootState,AppDispatch} from '../../app/store';
-import { Routes, Route, BrowserRouter,Link,useNavigate } from "react-router-dom";
+import { Routes, Route, BrowserRouter,Link,useNavigate,useLocation } from "react-router-dom";
 import{Device} from '../types';
 import styles from './Core.module.css';
 import{Button,
@@ -28,6 +32,8 @@ const Core:React.FC=()=>{
     const [anchorEl,setAnchorEl]=React.useState<HTMLElement | null>(null);
     const open =Boolean(anchorEl);
     const navigate=useNavigate();
+    const location=useLocation();
+    const isDisplayRoute = location.pathname === '/display';
 
     useEffect(()=>{
         dispatch(fetchDevice());
@@ -82,6 +88,7 @@ const Core:React.FC=()=>{
       </header> */}
       <main style={{height:'100%'}}>
         <div className={styles.main_content}>
+          {!isDisplayRoute && (
       <div className={styles.l_sidebar}> 
         <div className={styles.l_sidebar_inner}>
           <List>
@@ -103,13 +110,20 @@ const Core:React.FC=()=>{
               </ListItemIcon>
               <ListItemText primary="グループコンテンツ管理"/>
             </ListItemButton>
+            <ListItemButton onClick={()=>handleNavigation('/display')} className={styles.l_sidebar_item}>
+              <ListItemIcon>
+                <FolderIcon />
+              </ListItemIcon>
+              <ListItemText primary="サイネージを表示"/>
+            </ListItemButton>
           </List>
           
 
         </div>
-
       </div>
+      )}
       <div className={styles.l_main_conteiner}>
+      {!isDisplayRoute && (
         <div className={styles.l_header}>
           <div className={styles.l_header_inner}>
             <div className={styles.l_header_setmonitor}>
@@ -140,10 +154,15 @@ const Core:React.FC=()=>{
             </div>
           </div>
         </div>
+        )}
         <Routes>
         <Route path="/" element={<ContentPage/>}/>
         <Route path="/contents" element={<ContentPage/>} />
-        <Route path="/groups" element={<ContentGroupDisplay/>} />
+        <Route path="/contents/create-content" element={<ContentCreator/>} />
+        <Route path="/contents/edit/*" element={<ContentEdit/>} />
+        <Route path="/groups" element={<ContentGroupPage/>} />
+        <Route path="/groups/create-content-group" element={<CreateContentGroup/>} />
+        <Route path="/display" element={<DigitalSignage/>}/>
       </Routes>
       </div>
 
